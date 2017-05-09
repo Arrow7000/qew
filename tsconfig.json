@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "outDir": "dist",
+        "lib": [
+            "es2015"
+        ]
+    },
+    "include": [
+        "./src/*"
+    ],
+    "exclude": [
+        "node_modules"
+    ],
+    "compileOnSave": true
+}
