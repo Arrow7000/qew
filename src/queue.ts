@@ -1,6 +1,8 @@
 type onComplete = (promResult: any, numFulfilled: number, numRejected: number, done: () => void) => void;
 type asyncFunc = () => Promise<any>;
 type taskHolder = Task[];
+type getNumber = () => number;
+type delay = number | getNumber;
 interface Task {
     func: asyncFunc;
     onResolved: onComplete;
@@ -20,7 +22,7 @@ class Queue {
      * Not intended to be mutable
      */
     private max: number;
-    private delay: number;
+    private delay: delay;
     private isDone: boolean;
     private onResolved: onComplete;
     private onRejected: onComplete;
@@ -33,7 +35,7 @@ class Queue {
     private numFulfilled: number;
     private numRejected: number;
 
-    constructor(maxConcurrent: number = 1, delay: number = 0, { onResolved = null, onRejected = null }: QewOpts) {
+    constructor(maxConcurrent: number = 1, delay: delay = 0, { onResolved = null, onRejected = null }: QewOpts) {
         this.tasks = [];
         this.executing = [];
         this.numFulfilled = 0;
@@ -103,12 +105,13 @@ class Queue {
     }
 
     private doAfterEach(task: Task) {
+        const delayMs = typeof this.delay === 'function' ? this.delay() : this.delay;
         setTimeout(() => {
             task.done = true;
             this.executing = this.executing.filter(task => !task.done);
 
             this.tryMove();
-        }, this.delay);
+        }, delayMs);
     }
 
     private move() {

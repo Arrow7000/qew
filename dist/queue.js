@@ -63,11 +63,12 @@ var Queue = (function () {
     };
     Queue.prototype.doAfterEach = function (task) {
         var _this = this;
+        var delayMs = typeof this.delay === 'function' ? this.delay() : this.delay;
         setTimeout(function () {
             task.done = true;
             _this.executing = _this.executing.filter(function (task) { return !task.done; });
             _this.tryMove();
-        }, this.delay);
+        }, delayMs);
     };
     Queue.prototype.move = function () {
         if (this.executing.length >= this.max) {
