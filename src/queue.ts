@@ -1,4 +1,4 @@
-type onComplete = (promResult: any, numFulfilled?: number, numRejected?: number) => void;
+type onComplete = (promResult: any, numFulfilled: number, numRejected: number) => void;
 type asyncFunc = () => Promise<any>;
 type taskHolder = task[];
 
@@ -78,13 +78,13 @@ class Queue {
 
         func()
             .then(result => {
-                fulfill(result);
                 this.numFulfilled++;
+                fulfill(result, this.numFulfilled, this.numRejected);
                 this.doAfterEach(task);
             })
             .catch(error => {
-                reject(error);
                 this.numRejected++;
+                reject(error, this.numFulfilled, this.numRejected);
                 this.doAfterEach(task);
             });
     }

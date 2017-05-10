@@ -35,13 +35,13 @@ var Queue = (function () {
         var reject = onRejected || this.onRejected;
         func()
             .then(function (result) {
-            fulfill(result);
             _this.numFulfilled++;
+            fulfill(result, _this.numFulfilled, _this.numRejected);
             _this.doAfterEach(task);
         })
             .catch(function (error) {
-            reject(error);
             _this.numRejected++;
+            reject(error, _this.numFulfilled, _this.numRejected);
             _this.doAfterEach(task);
         });
     };
