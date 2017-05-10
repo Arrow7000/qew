@@ -55,7 +55,7 @@ function onRejected(error, numResolved, numRejected) {
  * Push single function onto stack
  */
 const func = () => asyncFunc('param');
-qew.push(func); // push an async function to the queue
+qew.push(func); // push an async function to the qew
 
 /** 
  * Push array of functions onto stack
@@ -64,7 +64,7 @@ const funcs = [0, 1, 2, 3, 4].map(param => asyncFunc(param));
 qew.push(funcs); // push an array of functions
 ```
 
-You can override the queue-wide success and error handlers by adding them as the 2nd and 3rd parameter respectively when you push a new function onto the stack.
+You can override the qew-wide success and error handlers by adding them as the 2nd and 3rd parameter respectively when you push a new function onto the stack.
 
 ```javascript
 const customOnResolved = () => console.log('Winning!');
@@ -74,7 +74,7 @@ const customOnRejected = () => console.log('Losing :(');
 qew.push(func, onResolved, customOnRejected);
 ```
 
-This means that if you are planning to add a custom success or failure handler for each function you don't need to initialise the queue with handlers.
+This means that if you are planning to add a custom success or failure handler for each function you don't need to initialise the qew with handlers.
 
 ```javascript
 const qew = new Qew(2); // look ma, no handlers!

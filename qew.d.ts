@@ -8,21 +8,21 @@ declare interface Task {
     done: boolean;
 }
 
-declare interface QueueFactory {
+declare interface QewFactory {
     new (concurrencyMax: number,
         onFulfilled?: onComplete,
-        onRejected?: onComplete): Queue;
+        onRejected?: onComplete): Qew;
 }
 
-// declare function Queue(concurrencyMax: number,
+// declare function Qew(concurrencyMax: number,
 //     onFulfilled?: onComplete,
-//     onRejected?: onComplete): Queue;
+//     onRejected?: onComplete): Qew;
 
 
-declare interface Queue {
+declare interface Qew {
     push: (func: asyncFunc | asyncFunc[],
         onFulfilled?: onComplete,
         onRejected?: onComplete) => void
 }
 
-declare var Queue: QueueFactory;
+declare var Qew: QewFactory;

@@ -1,2 +1,2 @@
-const Queue = require('./index');
-const q = new Queue()
+const Qew = require('./index');
+const q = new Qew()

@@ -1,6 +1,6 @@
 "use strict";
-var Queue = (function () {
-    function Queue(maxConcurrent, delay, onResolved, onRejected) {
+var Qew = (function () {
+    function Qew(maxConcurrent, delay, onResolved, onRejected) {
         if (maxConcurrent === void 0) { maxConcurrent = 1; }
         if (delay === void 0) { delay = 0; }
         if (onResolved === void 0) { onResolved = null; }
@@ -19,10 +19,10 @@ var Queue = (function () {
         this.isDone = false;
         this.done = this.done.bind(this);
     }
-    Queue.prototype.push = function (func, onResolved, onRejected) {
+    Qew.prototype.push = function (func, onResolved, onRejected) {
         var _this = this;
         if (this.isDone) {
-            throw new Error('Cannot push onto finished queue');
+            throw new Error('Cannot push onto finished qew');
         }
         if (func.length) {
             func.forEach(function (func) {
@@ -33,12 +33,12 @@ var Queue = (function () {
             this.addTask(func, onResolved, onRejected);
         }
     };
-    Queue.prototype.done = function () {
+    Qew.prototype.done = function () {
         this.isDone = true;
         this.tasks = [];
         this.executing = [];
     };
-    Queue.prototype.addTask = function (func, onResolved, onRejected) {
+    Qew.prototype.addTask = function (func, onResolved, onRejected) {
         var task = {
             func: func,
             onResolved: onResolved,
@@ -48,7 +48,7 @@ var Queue = (function () {
         this.tasks = this.tasks.concat([task]);
         this.tryMove();
     };
-    Queue.prototype.execute = function (task) {
+    Qew.prototype.execute = function (task) {
         var _this = this;
         var func = task.func, onResolved = task.onResolved, onRejected = task.onRejected;
         var fulfill = onResolved || this.onResolved;
@@ -65,7 +65,7 @@ var Queue = (function () {
             _this.doAfterEach(task);
         });
     };
-    Queue.prototype.doAfterEach = function (task) {
+    Qew.prototype.doAfterEach = function (task) {
         var _this = this;
         var delayMs = typeof this.delay === 'function' ? this.delay() : this.delay;
         setTimeout(function () {
@@ -74,7 +74,7 @@ var Queue = (function () {
             _this.tryMove();
         }, delayMs);
     };
-    Queue.prototype.move = function () {
+    Qew.prototype.move = function () {
         if (this.executing.length >= this.max) {
             throw new Error("Cannot add more than " + this.max + " tasks to execute simultaneously");
         }
@@ -87,11 +87,11 @@ var Queue = (function () {
         this.executing = this.executing.concat([task]); // add task to executing list
         this.execute(task);
     };
-    Queue.prototype.tryMove = function () {
+    Qew.prototype.tryMove = function () {
         if (this.executing.length < this.max && this.tasks.length > 0) {
             this.move();
         }
     };
-    return Queue;
+    return Qew;
 }());
-module.exports = Queue;
+module.exports = Qew;

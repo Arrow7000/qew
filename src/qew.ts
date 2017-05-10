@@ -11,7 +11,7 @@ interface Task {
 }
 
 
-class Queue {
+class Qew {
     /**
      * Set by user
      * Not intended to be mutable
@@ -49,7 +49,7 @@ class Queue {
 
     public push(func: asyncFunc | asyncFunc[], onResolved?: onComplete, onRejected?: onComplete): void {
         if (this.isDone) {
-            throw new Error('Cannot push onto finished queue');
+            throw new Error('Cannot push onto finished qew');
         }
 
         if (func.length) {
@@ -133,7 +133,7 @@ class Queue {
 }
 
 
-// const queue = new Queue(2, 0, {
+// const qew = new Qew(2, 0, {
 //     onResolved: (result, numDone, numFailed, done) => {
 //         console.log(result);
 //         console.log(numDone, numFailed);
@@ -146,7 +146,7 @@ class Queue {
 // });
 
 // for (let i = 0; i < 20; i++) {
-//     queue.push(() => ding(2000));
+//     qew.push(() => ding(2000));
 // }
 
 
@@ -165,4 +165,4 @@ class Queue {
 // }
 
 
-export = Queue; 
+export = Qew; 
