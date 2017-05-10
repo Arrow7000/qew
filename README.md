@@ -77,15 +77,19 @@ qew.push(func, onResolved, customOnRejected);
 This means that if you are planning to add a custom success or failure handler for each function you don't need to initialise the queue with handlers.
 
 ```javascript
-const qew = new Qew(2, randomDelay); // look ma, no handlers!
+const qew = new Qew(2); // look ma, no handlers!
 qew.push(func, customOnResolved, customOnRejected);
 ```
 
-### Delay functions
+### Delay generator
 
-The delay between promises doesn't need to be a hardcoded value, you can also have it be a function that returns a number.
+The delay between promises doesn't need to be a hardcoded number, you can also pass in a function that returns a number.
 
 ```javascript
-const randomDelay = () => Math.random() * 1000;
+const randomDelay = () => 500 + Math.random() * 500;
 const qew = new Qew(2, randomDelay);
 ```
+
+## Contributing
+
+To contribute or report issues please create a pull request or an issue accordingly.

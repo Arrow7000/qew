@@ -1,8 +1,4 @@
 "use strict";
-// interface QewOpts {
-//     onResolved: onComplete;
-//     onRejected: onComplete;
-// }
 var Queue = (function () {
     function Queue(maxConcurrent, delay, onResolved, onRejected) {
         if (maxConcurrent === void 0) { maxConcurrent = 1; }

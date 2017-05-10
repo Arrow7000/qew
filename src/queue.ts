@@ -9,11 +9,6 @@ interface Task {
     onRejected: onComplete;
     done: boolean;
 }
-// interface QewOpts {
-//     onResolved: onComplete;
-//     onRejected: onComplete;
-// }
-
 
 
 class Queue {
