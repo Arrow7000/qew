@@ -1,29 +1,43 @@
 "use strict";
 var Queue = (function () {
-    function Queue(concurrencyMax, onFulfilled, onRejected) {
+    function Queue(maxConcurrent, delay, _a) {
+        if (maxConcurrent === void 0) { maxConcurrent = 1; }
+        if (delay === void 0) { delay = 0; }
+        var _b = _a.onResolved, onResolved = _b === void 0 ? null : _b, _c = _a.onRejected, onRejected = _c === void 0 ? null : _c;
         this.tasks = [];
         this.executing = [];
         this.numFulfilled = 0;
         this.numRejected = 0;
-        this.max = concurrencyMax;
-        this.onFulfilled = onFulfilled;
+        this.isDone = false;
+        this.max = maxConcurrent;
+        this.delay = delay;
+        this.onResolved = onResolved;
         this.onRejected = onRejected;
+        this.done = this.done.bind(this);
     }
-    Queue.prototype.push = function (func, onFulfilled, onRejected) {
+    Queue.prototype.push = function (func, onResolved, onRejected) {
         var _this = this;
+        if (this.isDone) {
+            throw new Error('Cannot push onto finished queue');
+        }
         if (func.length) {
             func.forEach(function (func) {
-                _this.addTask(func, onFulfilled, onRejected);
+                _this.addTask(func, onResolved, onRejected);
             });
         }
         else {
-            this.addTask(func, onFulfilled, onRejected);
+            this.addTask(func, onResolved, onRejected);
         }
     };
-    Queue.prototype.addTask = function (func, onFulfilled, onRejected) {
+    Queue.prototype.done = function () {
+        this.isDone = true;
+        this.tasks = [];
+        this.executing = [];
+    };
+    Queue.prototype.addTask = function (func, onResolved, onRejected) {
         var task = {
             func: func,
-            onFulfilled: onFulfilled,
+            onResolved: onResolved,
             onRejected: onRejected,
             done: false,
         };
@@ -32,25 +46,28 @@ var Queue = (function () {
     };
     Queue.prototype.execute = function (task) {
         var _this = this;
-        var func = task.func, onFulfilled = task.onFulfilled, onRejected = task.onRejected;
-        var fulfill = onFulfilled || this.onFulfilled;
+        var func = task.func, onResolved = task.onResolved, onRejected = task.onRejected;
+        var fulfill = onResolved || this.onResolved;
         var reject = onRejected || this.onRejected;
         func()
             .then(function (result) {
             _this.numFulfilled++;
-            fulfill(result, _this.numFulfilled, _this.numRejected);
+            fulfill(result, _this.numFulfilled, _this.numRejected, _this.done);
             _this.doAfterEach(task);
         })
             .catch(function (error) {
             _this.numRejected++;
-            reject(error, _this.numFulfilled, _this.numRejected);
+            reject(error, _this.numFulfilled, _this.numRejected, _this.done);
             _this.doAfterEach(task);
         });
     };
     Queue.prototype.doAfterEach = function (task) {
-        task.done = true;
-        this.executing = this.executing.filter(function (task) { return !task.done; });
-        this.tryMove();
+        var _this = this;
+        setTimeout(function () {
+            task.done = true;
+            _this.executing = _this.executing.filter(function (task) { return !task.done; });
+            _this.tryMove();
+        }, this.delay);
     };
     Queue.prototype.move = function () {
         if (this.executing.length >= this.max) {

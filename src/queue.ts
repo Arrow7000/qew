@@ -1,11 +1,15 @@
-type onComplete = (promResult: any, numFulfilled?: number, numRejected?: number) => void;
+type onComplete = (promResult: any, numFulfilled: number, numRejected: number, done: () => void) => void;
 type asyncFunc = () => Promise<any>;
 type taskHolder = Task[];
 interface Task {
     func: asyncFunc;
-    onFulfilled: onComplete;
+    onResolved: onComplete;
     onRejected: onComplete;
     done: boolean;
+}
+interface QewOpts {
+    onResolved: onComplete;
+    onRejected: onComplete;
 }
 
 
@@ -17,7 +21,8 @@ class Queue {
      */
     private max: number;
     private delay: number;
-    private onFulfilled: onComplete;
+    private isDone: boolean;
+    private onResolved: onComplete;
     private onRejected: onComplete;
     private tasks: taskHolder;
     private executing: taskHolder;
@@ -28,41 +33,48 @@ class Queue {
     private numFulfilled: number;
     private numRejected: number;
 
-    constructor(
-        concurrencyMax: number,
-        onFulfilled?: onComplete,
-        onRejected?: onComplete
-    ) {
+    constructor(maxConcurrent: number = 1, delay: number = 0, { onResolved = null, onRejected = null }: QewOpts) {
         this.tasks = [];
         this.executing = [];
         this.numFulfilled = 0;
         this.numRejected = 0;
+        this.isDone = false;
 
-        this.max = concurrencyMax;
-        this.onFulfilled = onFulfilled;
+        this.max = maxConcurrent;
+        this.delay = delay;
+        this.onResolved = onResolved;
         this.onRejected = onRejected;
+
+        this.done = this.done.bind(this);
     }
 
-    public push(func: asyncFunc | asyncFunc[],
-        onFulfilled?: onComplete,
-        onRejected?: onComplete): void {
+    public push(func: asyncFunc | asyncFunc[], onResolved?: onComplete, onRejected?: onComplete): void {
+        if (this.isDone) {
+            throw new Error('Cannot push onto finished queue');
+        }
 
         if (func.length) {
             (<asyncFunc[]>func).forEach(func => {
-                this.addTask(func, onFulfilled, onRejected);
+                this.addTask(func, onResolved, onRejected);
             });
         } else {
-            this.addTask((<asyncFunc>func), onFulfilled, onRejected);
+            this.addTask((<asyncFunc>func), onResolved, onRejected);
         }
     }
 
+    public done() {
+        this.isDone = true;
+        this.tasks = [];
+        this.executing = [];
+    }
+
     private addTask(func: asyncFunc,
-        onFulfilled?: onComplete,
+        onResolved?: onComplete,
         onRejected?: onComplete): void {
 
         const task: Task = {
             func,
-            onFulfilled,
+            onResolved,
             onRejected,
             done: false,
         };
@@ -73,28 +85,30 @@ class Queue {
     }
 
     private execute(task: Task) {
-        const { func, onFulfilled, onRejected } = task;
-        const fulfill = onFulfilled || this.onFulfilled;
+        const { func, onResolved, onRejected } = task;
+        const fulfill = onResolved || this.onResolved;
         const reject = onRejected || this.onRejected;
 
         func()
             .then(result => {
                 this.numFulfilled++;
-                fulfill(result, this.numFulfilled, this.numRejected);
+                fulfill(result, this.numFulfilled, this.numRejected, this.done);
                 this.doAfterEach(task);
             })
             .catch(error => {
                 this.numRejected++;
-                reject(error, this.numFulfilled, this.numRejected);
+                reject(error, this.numFulfilled, this.numRejected, this.done);
                 this.doAfterEach(task);
             });
     }
 
     private doAfterEach(task: Task) {
-        task.done = true;
-        this.executing = this.executing.filter(task => !task.done);
+        setTimeout(() => {
+            task.done = true;
+            this.executing = this.executing.filter(task => !task.done);
 
-        this.tryMove();
+            this.tryMove();
+        }, this.delay);
     }
 
     private move() {
@@ -118,4 +132,37 @@ class Queue {
     }
 }
 
-export = Queue;
+
+// const queue = new Queue(2, 0, {
+//     onResolved: (result, numDone, numFailed, done) => {
+//         console.log(result);
+//         console.log(numDone, numFailed);
+//         if (numDone + numFailed >= 10) {
+//             console.log('All dunged out!!');
+//             done();
+//         }
+//     },
+//     onRejected: (result) => console.error(result)
+// });
+
+// for (let i = 0; i < 20; i++) {
+//     queue.push(() => ding(2000));
+// }
+
+
+
+
+// function ding(delay) {
+//     return new Promise((resolve, reject) => {
+//         setTimeout(function () {
+//             if (Math.random() < .95) {
+//                 resolve('ding!');
+//             } else {
+//                 reject('dong...')
+//             }
+//         }, delay);
+//     });
+// }
+
+
+export = Queue; 
