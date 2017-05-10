@@ -11,6 +11,7 @@
     "keywords": [],
     "author": "",
     "license": "ISC",
+    "repository"::"Arrow7000/qew",
     "devDependencies": {
         "@types/node": "^7.0.18",
         "typescript": "^2.3.2"
