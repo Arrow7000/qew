@@ -35,6 +35,8 @@ class Queue {
     ) {
         this.tasks = [];
         this.executing = [];
+        this.numFulfilled = 0;
+        this.numRejected = 0;
 
         this.max = concurrencyMax;
         this.onFulfilled = onFulfilled;

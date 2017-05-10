@@ -3,6 +3,8 @@ var Queue = (function () {
     function Queue(concurrencyMax, onFulfilled, onRejected) {
         this.tasks = [];
         this.executing = [];
+        this.numFulfilled = 0;
+        this.numRejected = 0;
         this.max = concurrencyMax;
         this.onFulfilled = onFulfilled;
         this.onRejected = onRejected;
