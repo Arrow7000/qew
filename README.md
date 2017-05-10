@@ -23,12 +23,13 @@ $ yarn add qew
 ```javascript
 const Qew = require('qew');
 
-/** 
- * Initialise new qew with parameters:
- *    - 2: max simultaneous processes
- *    - 250: delay in ms between end of one function and start of the next
- *    - onResolved: promise success handler
- *    - onRejected: promise failure handler
+ /**
+ * Initialise new qew
+ * @constructor
+ * @param {number} maxConcurrent - Max simultaneous processes
+ * @param {number} delay - Delay in ms between end of one function and start of the next
+ * @param {function} onResolved - Promise success handler
+ * @param {function} onRejected - Promise failure handler
  */
 const qew = new Qew(2, 250, onResolved, onRejected);
 
