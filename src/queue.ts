@@ -7,7 +7,6 @@ interface task {
     onFulfilled: onComplete;
     onRejected: onComplete;
     done: boolean;
-    id: number;
 }
 
 
@@ -27,7 +26,6 @@ class Queue {
     /**
      * Internal state variables
      */
-    private idCounter: number;
     private numFulfilled: number;
     private numRejected: number;
 
@@ -36,7 +34,6 @@ class Queue {
         onFulfilled?: onComplete,
         onRejected?: onComplete
     ) {
-        this.idCounter = 0;
         this.tasks = [];
         this.executing = [];
 
@@ -62,14 +59,11 @@ class Queue {
         onFulfilled?: onComplete,
         onRejected?: onComplete): void {
 
-        this.idCounter++;
-
         const task: task = {
             func,
             onFulfilled,
             onRejected,
             done: false,
-            id: this.idCounter
         };
 
         this.tasks = [...this.tasks, task];

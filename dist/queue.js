@@ -1,7 +1,6 @@
 "use strict";
 var Queue = (function () {
     function Queue(concurrencyMax, onFulfilled, onRejected) {
-        this.idCounter = 0;
         this.tasks = [];
         this.executing = [];
         this.max = concurrencyMax;
@@ -20,13 +19,11 @@ var Queue = (function () {
         }
     };
     Queue.prototype.addTask = function (func, onFulfilled, onRejected) {
-        this.idCounter++;
         var task = {
             func: func,
             onFulfilled: onFulfilled,
             onRejected: onRejected,
             done: false,
-            id: this.idCounter
         };
         this.tasks = this.tasks.concat([task]);
         this.tryMove();
