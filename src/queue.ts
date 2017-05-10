@@ -1,8 +1,7 @@
-type onComplete = (promResult: any, numFulfilled: number, numRejected: number) => void;
+type onComplete = (promResult: any, numFulfilled?: number, numRejected?: number) => void;
 type asyncFunc = () => Promise<any>;
-type taskHolder = task[];
-
-interface task {
+type taskHolder = Task[];
+interface Task {
     func: asyncFunc;
     onFulfilled: onComplete;
     onRejected: onComplete;
@@ -10,8 +9,8 @@ interface task {
 }
 
 
-class Queue {
 
+class Queue {
     /**
      * Set by user
      * Not intended to be mutable
@@ -59,7 +58,7 @@ class Queue {
         onFulfilled?: onComplete,
         onRejected?: onComplete): void {
 
-        const task: task = {
+        const task: Task = {
             func,
             onFulfilled,
             onRejected,
@@ -71,7 +70,7 @@ class Queue {
         this.tryMove();
     }
 
-    private execute(task: task) {
+    private execute(task: Task) {
         const { func, onFulfilled, onRejected } = task;
         const fulfill = onFulfilled || this.onFulfilled;
         const reject = onRejected || this.onRejected;
@@ -89,7 +88,7 @@ class Queue {
             });
     }
 
-    private doAfterEach(task: task) {
+    private doAfterEach(task: Task) {
         task.done = true;
         this.executing = this.executing.filter(task => !task.done);
 
