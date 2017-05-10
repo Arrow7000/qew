@@ -10,7 +10,7 @@
     "keywords": [],
     "author": "",
     "license": "ISC",
-    "dependencies": {
+    "devDependencies": {
         "@types/node": "^7.0.18",
         "typescript": "^2.3.2"
     }
