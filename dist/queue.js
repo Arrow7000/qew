@@ -1,18 +1,26 @@
 "use strict";
+// interface QewOpts {
+//     onResolved: onComplete;
+//     onRejected: onComplete;
+// }
 var Queue = (function () {
-    function Queue(maxConcurrent, delay, _a) {
+    function Queue(maxConcurrent, delay, onResolved, onRejected) {
         if (maxConcurrent === void 0) { maxConcurrent = 1; }
         if (delay === void 0) { delay = 0; }
-        var _b = _a.onResolved, onResolved = _b === void 0 ? null : _b, _c = _a.onRejected, onRejected = _c === void 0 ? null : _c;
+        if (onResolved === void 0) { onResolved = null; }
+        if (onRejected === void 0) { onRejected = null; }
+        if (maxConcurrent < 1) {
+            throw new Error('Max concurrent functions needs to be at least 1');
+        }
+        this.max = maxConcurrent;
+        this.delay = delay;
+        this.onResolved = onResolved;
+        this.onRejected = onRejected;
         this.tasks = [];
         this.executing = [];
         this.numFulfilled = 0;
         this.numRejected = 0;
         this.isDone = false;
-        this.max = maxConcurrent;
-        this.delay = delay;
-        this.onResolved = onResolved;
-        this.onRejected = onRejected;
         this.done = this.done.bind(this);
     }
     Queue.prototype.push = function (func, onResolved, onRejected) {

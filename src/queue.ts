@@ -9,10 +9,10 @@ interface Task {
     onRejected: onComplete;
     done: boolean;
 }
-interface QewOpts {
-    onResolved: onComplete;
-    onRejected: onComplete;
-}
+// interface QewOpts {
+//     onResolved: onComplete;
+//     onRejected: onComplete;
+// }
 
 
 
@@ -35,18 +35,20 @@ class Queue {
     private numFulfilled: number;
     private numRejected: number;
 
-    constructor(maxConcurrent: number = 1, delay: delay = 0, { onResolved = null, onRejected = null }: QewOpts) {
-        this.tasks = [];
-        this.executing = [];
-        this.numFulfilled = 0;
-        this.numRejected = 0;
-        this.isDone = false;
-
+    constructor(maxConcurrent: number = 1, delay: delay = 0, onResolved: onComplete = null, onRejected: onComplete = null) {
+        if (maxConcurrent < 1) {
+            throw new Error('Max concurrent functions needs to be at least 1');
+        }
         this.max = maxConcurrent;
         this.delay = delay;
         this.onResolved = onResolved;
         this.onRejected = onRejected;
 
+        this.tasks = [];
+        this.executing = [];
+        this.numFulfilled = 0;
+        this.numRejected = 0;
+        this.isDone = false;
         this.done = this.done.bind(this);
     }
 
