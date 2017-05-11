@@ -1,4 +1,5 @@
 type onComplete = (promResult: any, numFulfilled: number, numRejected: number, done: () => void) => void;
+type onDone = (numFulfilled: number, numRejected: number) => void;
 type asyncFunc = () => Promise<any>;
 type taskHolder = Task[];
 type getNumber = () => number;
@@ -9,6 +10,8 @@ interface Task {
     onRejected: onComplete;
     done: boolean;
 }
+
+const doNothing = () => null;
 
 
 class Qew {
@@ -23,6 +26,9 @@ class Qew {
     private onRejected: onComplete;
     private tasks: taskHolder;
     private executing: taskHolder;
+    private minDone: number;
+    private minDoneSuccess: boolean;
+    private onDone: onDone;
 
     /**
      * Internal state variables
@@ -30,7 +36,11 @@ class Qew {
     private numFulfilled: number;
     private numRejected: number;
 
-    constructor(maxConcurrent: number = 1, delay: delay = 0, onResolved: onComplete = null, onRejected: onComplete = null) {
+    constructor(maxConcurrent: number = 1,
+        delay: delay = 0,
+        onResolved: onComplete = null,
+        onRejected: onComplete = null,
+        onDone: onDone = doNothing) {
         if (maxConcurrent < 1) {
             throw new Error('Max concurrent functions needs to be at least 1');
         }
@@ -44,28 +54,45 @@ class Qew {
         this.numFulfilled = 0;
         this.numRejected = 0;
         this.isDone = false;
+        this.minDone = null;
+        this.minDoneSuccess = false;
+        this.onDone = onDone;
         this.done = this.done.bind(this);
     }
 
-    public push(func: asyncFunc | asyncFunc[], onResolved?: onComplete, onRejected?: onComplete): void {
+    public push(func: asyncFunc | asyncFunc[], onResolved?: onComplete, onRejected?: onComplete) {
         if (this.isDone) {
             throw new Error('Cannot push onto finished qew');
         }
 
-        if (func.length) {
-            (<asyncFunc[]>func).forEach(func => {
+        if (Array.isArray(func)) {
+            func.forEach(func => {
                 this.addTask(func, onResolved, onRejected);
             });
         } else {
-            this.addTask((<asyncFunc>func), onResolved, onRejected);
+            this.addTask(func, onResolved, onRejected);
         }
+
+        return this;
     }
 
-    public done() {
-        this.isDone = true;
-        this.tasks = [];
-        this.executing = [];
+    public done(afterNum: number = null, onlySuccess: boolean = false) {
+        if (!this.isDone) {
+            if (afterNum) {
+                this.minDone = afterNum;
+                this.minDoneSuccess = onlySuccess;
+            } else {
+                this.isDone = true;
+                this.tasks = [];
+                this.executing = [];
+
+                this.onDone(this.numFulfilled, this.numRejected);
+            }
+        }
+
+        return this;
     }
+
 
     private addTask(func: asyncFunc,
         onResolved?: onComplete,
@@ -121,10 +148,20 @@ class Qew {
     private tryMove() {
         const isFree = this.executing.length < this.max;
         const hasWaiting = this.tasks.length > 0;
-        if (isFree && hasWaiting) {
+        let numDone = this.numFulfilled;
+        if (this.minDoneSuccess) {
+            numDone += this.numRejected;
+        }
+        const isDone = this.minDone && numDone >= this.minDone;
+
+        if (isDone) {
+            this.done();
+        } else if (isFree && hasWaiting) {
             this.move();
         }
     }
 }
+
+const qew = new Qew();
 
 export = Qew; 

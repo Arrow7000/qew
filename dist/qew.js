@@ -1,10 +1,12 @@
 "use strict";
+var doNothing = function () { return null; };
 var Qew = (function () {
-    function Qew(maxConcurrent, delay, onResolved, onRejected) {
+    function Qew(maxConcurrent, delay, onResolved, onRejected, onDone) {
         if (maxConcurrent === void 0) { maxConcurrent = 1; }
         if (delay === void 0) { delay = 0; }
         if (onResolved === void 0) { onResolved = null; }
         if (onRejected === void 0) { onRejected = null; }
+        if (onDone === void 0) { onDone = doNothing; }
         if (maxConcurrent < 1) {
             throw new Error('Max concurrent functions needs to be at least 1');
         }
@@ -17,6 +19,9 @@ var Qew = (function () {
         this.numFulfilled = 0;
         this.numRejected = 0;
         this.isDone = false;
+        this.minDone = null;
+        this.minDoneSuccess = false;
+        this.onDone = onDone;
         this.done = this.done.bind(this);
     }
     Qew.prototype.push = function (func, onResolved, onRejected) {
@@ -24,7 +29,7 @@ var Qew = (function () {
         if (this.isDone) {
             throw new Error('Cannot push onto finished qew');
         }
-        if (func.length) {
+        if (Array.isArray(func)) {
             func.forEach(function (func) {
                 _this.addTask(func, onResolved, onRejected);
             });
@@ -32,11 +37,24 @@ var Qew = (function () {
         else {
             this.addTask(func, onResolved, onRejected);
         }
+        return this;
     };
-    Qew.prototype.done = function () {
-        this.isDone = true;
-        this.tasks = [];
-        this.executing = [];
+    Qew.prototype.done = function (afterNum, onlySuccess) {
+        if (afterNum === void 0) { afterNum = null; }
+        if (onlySuccess === void 0) { onlySuccess = false; }
+        if (!this.isDone) {
+            if (afterNum) {
+                this.minDone = afterNum;
+                this.minDoneSuccess = onlySuccess;
+            }
+            else {
+                this.isDone = true;
+                this.tasks = [];
+                this.executing = [];
+                this.onDone(this.numFulfilled, this.numRejected);
+            }
+        }
+        return this;
     };
     Qew.prototype.addTask = function (func, onResolved, onRejected) {
         var task = {
@@ -83,10 +101,19 @@ var Qew = (function () {
     Qew.prototype.tryMove = function () {
         var isFree = this.executing.length < this.max;
         var hasWaiting = this.tasks.length > 0;
-        if (isFree && hasWaiting) {
+        var numDone = this.numFulfilled;
+        if (this.minDoneSuccess) {
+            numDone += this.numRejected;
+        }
+        var isDone = this.minDone && numDone >= this.minDone;
+        if (isDone) {
+            this.done();
+        }
+        else if (isFree && hasWaiting) {
             this.move();
         }
     };
     return Qew;
 }());
+var qew = new Qew();
 module.exports = Qew;
