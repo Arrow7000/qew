@@ -70,28 +70,46 @@ var Qew = (function () {
         var delayMs = typeof this.delay === 'function' ? this.delay() : this.delay;
         setTimeout(function () {
             task.done = true;
-            _this.executing = _this.executing.filter(function (task) { return !task.done; });
+            _this.executing = _this.executing.filter(function (task) { return !task.done; }); // clean up
             _this.tryMove();
         }, delayMs);
     };
     Qew.prototype.move = function () {
-        if (this.executing.length >= this.max) {
-            throw new Error("Cannot add more than " + this.max + " tasks to execute simultaneously");
-        }
-        if (this.tasks.length < 1) {
-            throw new Error("No more tasks to load");
-        }
-        var len = this.tasks.length - 1; // get index of last task
-        var task = this.tasks[len]; // get last task
-        this.tasks = this.tasks.slice(0, len); // remove task from tasks list
-        this.executing = this.executing.concat([task]); // add task to executing list
+        var task = this.tasks[0]; // get task
+        this.tasks = this.tasks.slice(1); // remove task from waiting list
+        this.executing = this.executing.concat([task]); // push task to executing
         this.execute(task);
     };
     Qew.prototype.tryMove = function () {
-        if (this.executing.length < this.max && this.tasks.length > 0) {
+        var isFree = this.executing.length < this.max;
+        var hasWaiting = this.tasks.length > 0;
+        if (isFree && hasWaiting) {
             this.move();
         }
     };
     return Qew;
 }());
+var qew = new Qew(2, 0, function (result, numDone, numFailed, done) {
+    console.log(result);
+    console.log(numDone, numFailed);
+    if (numDone + numFailed >= 10) {
+        console.log('All dunged out!!');
+        done();
+    }
+}, function (result) { return console.error(result); });
+for (var i = 0; i < 20; i++) {
+    qew.push(function () { return ding(2000); });
+}
+function ding(delay) {
+    return new Promise(function (resolve, reject) {
+        setTimeout(function () {
+            if (Math.random() < .95) {
+                resolve('ding!');
+            }
+            else {
+                reject('dong...');
+            }
+        }, delay);
+    });
+}
 module.exports = Qew;

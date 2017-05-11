@@ -105,64 +105,56 @@ class Qew {
         const delayMs = typeof this.delay === 'function' ? this.delay() : this.delay;
         setTimeout(() => {
             task.done = true;
-            this.executing = this.executing.filter(task => !task.done);
+            this.executing = this.executing.filter(task => !task.done); // clean up
 
             this.tryMove();
         }, delayMs);
     }
 
     private move() {
-        if (this.executing.length >= this.max) {
-            throw new Error(`Cannot add more than ${this.max} tasks to execute simultaneously`);
-        }
-        if (this.tasks.length < 1) {
-            throw new Error(`No more tasks to load`);
-        }
-        const len = this.tasks.length - 1; // get index of last task
-        const task = this.tasks[len]; // get last task
-        this.tasks = this.tasks.slice(0, len); // remove task from tasks list
-        this.executing = [...this.executing, task]; // add task to executing list
+        const task = this.tasks[0]; // get task
+        this.tasks = this.tasks.slice(1); // remove task from waiting list
+        this.executing = [...this.executing, task]; // push task to executing
         this.execute(task);
     }
 
     private tryMove() {
-        if (this.executing.length < this.max && this.tasks.length > 0) {
+        const isFree = this.executing.length < this.max;
+        const hasWaiting = this.tasks.length > 0;
+        if (isFree && hasWaiting) {
             this.move();
         }
     }
 }
 
 
-// const qew = new Qew(2, 0, {
-//     onResolved: (result, numDone, numFailed, done) => {
-//         console.log(result);
-//         console.log(numDone, numFailed);
-//         if (numDone + numFailed >= 10) {
-//             console.log('All dunged out!!');
-//             done();
-//         }
-//     },
-//     onRejected: (result) => console.error(result)
-// });
+const qew = new Qew(2, 0, (result, numDone, numFailed, done) => {
+    console.log(result);
+    console.log(numDone, numFailed);
+    if (numDone + numFailed >= 10) {
+        console.log('All dunged out!!');
+        done();
+    }
+}, (result) => console.error(result));
 
-// for (let i = 0; i < 20; i++) {
-//     qew.push(() => ding(2000));
-// }
+for (let i = 0; i < 20; i++) {
+    qew.push(() => ding(2000));
+}
 
 
 
 
-// function ding(delay) {
-//     return new Promise((resolve, reject) => {
-//         setTimeout(function () {
-//             if (Math.random() < .95) {
-//                 resolve('ding!');
-//             } else {
-//                 reject('dong...')
-//             }
-//         }, delay);
-//     });
-// }
+function ding(delay) {
+    return new Promise((resolve, reject) => {
+        setTimeout(function () {
+            if (Math.random() < .95) {
+                resolve('ding!');
+            } else {
+                reject('dong...')
+            }
+        }, delay);
+    });
+}
 
 
 export = Qew; 
