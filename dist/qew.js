@@ -89,27 +89,4 @@ var Qew = (function () {
     };
     return Qew;
 }());
-var qew = new Qew(2, 0, function (result, numDone, numFailed, done) {
-    console.log(result);
-    console.log(numDone, numFailed);
-    if (numDone + numFailed >= 10) {
-        console.log('All dunged out!!');
-        done();
-    }
-}, function (result) { return console.error(result); });
-for (var i = 0; i < 20; i++) {
-    qew.push(function () { return ding(2000); });
-}
-function ding(delay) {
-    return new Promise(function (resolve, reject) {
-        setTimeout(function () {
-            if (Math.random() < .95) {
-                resolve('ding!');
-            }
-            else {
-                reject('dong...');
-            }
-        }, delay);
-    });
-}
 module.exports = Qew;
