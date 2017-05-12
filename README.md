@@ -76,6 +76,60 @@ const randomDelay = () => 500 + Math.random() * 500;
 const qew = new Qew(2, randomDelay);
 ```
 
+## Use cases
+
+### Accessing rate-limited APIs
+
+Basic example, queuing individual asynchronous functions.
+
+```javascript
+const qew = new Qew(1, 100); // for API that has a rate limit of 10 reqs/sec
+
+qew.push(() => accessApi('a'), callback);
+qew.push(() => accessApi('b'), callback);
+qew.push(() => accessApi('c'), callback);
+
+
+function callback(err, result) {
+    if (err) {
+        return console.error(err);
+    }
+    console.log(result);
+}
+```
+
+Where it gets really powerful is with grouping sets of operations together, e.g. firing off groups of API requests for various users, where one user needs a group of multiple requests each.
+
+Qew allows you to group sets of operations together and then allow you to do something with the array of the results; kind of like `Promise.all` but with controlled throttling.
+
+```javascript
+const qew = new Qew(1, 100); // for API that has a rate limit of 10 reqs/sec
+
+const funcsArray = ['a', 'b', 'c'].map(char => {
+    return () => accessApi(char);
+});
+
+qew.push(funcsArray, arrayCallback);
+
+
+function arrayCallback(responses) { // responses will be an array of objects with schema [{ result, error }]
+    const successResults = responses
+        .filter(response => !response.error) // return only successful results
+        .map(response => response.result); // get the result from the response object
+
+    console.log(successResults);
+}
+```
+
+The `qew` object can be reused for multiple arrays, so that even requests from multiple users will be throttled according to the concurrency and rate limit specified in the constructor.
+
+```javascript
+qew.push(['a', 'b', 'c'].map(makeFunc), arrayCallback);
+qew.push(['d', 'e', 'f'].map(makeFunc), arrayCallback);
+qew.push(['g', 'h', 'i'].map(makeFunc), arrayCallback);
+```
+
+
 ## Contributing
 
 To contribute or report issues please create a pull request or an issue accordingly.
