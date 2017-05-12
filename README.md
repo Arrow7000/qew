@@ -38,7 +38,8 @@ const qew = new Qew(2, 250);
 /** 
  * Push single function onto stack
  */
-const func = () => asyncFunc('param');
+const func = () => asyncFunc('param'); // async function
+
 qew.push(func, (err, result) => {
     if (err) {
         return console.error(err);
@@ -47,13 +48,15 @@ qew.push(func, (err, result) => {
     console.log(result);
 });
 
+
 /** 
  * Push array of functions onto stack
  */
-const funcs = [0, 1, 2, 3, 4].map(param => asyncFunc(param));
-qew.push(funcs, resultObjs => {
+const funcs = [0, 1, 2, 3, 4].map(param => asyncFunc(param)); // array of async functions
 
-    for (const resultObj in resultObjs) {
+qew.push(funcs, resultObjects => {
+
+    for (const resultObj of resultObjects) {
 
         const { result, error } = resultObj;
 
@@ -64,7 +67,7 @@ qew.push(funcs, resultObjs => {
 
 ### Delay generator
 
-The delay between promises doesn't need to be a hardcoded number, you can also pass in a function that returns a number.
+The delay parameter doesn't need to be a hardcoded number, you can also pass in a function that returns a number.
 
 ```javascript
 const randomDelay = () => 500 + Math.random() * 500;
