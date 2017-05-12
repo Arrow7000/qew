@@ -6,8 +6,8 @@ type asyncFunc = () => Promise<any>;
 type getNumber = () => number;
 type delay = number | getNumber;
 interface GroupResult {
-    result?: promSuccessResult;
-    error?: Error;
+    result: promSuccessResult | null;
+    error: Error | null;
 }
 
 interface GroupResultsHolder {
@@ -71,8 +71,8 @@ class Qew {
         this.groupId = 0;
     }
 
-    public push(func: asyncFunc, cb?: callback): this;
-    public push(funcs: asyncFunc[], cb?: groupCallback): this;
+    public push(func: asyncFunc, cb: callback): this;
+    public push(funcs: asyncFunc[], cb: groupCallback): this;
 
     public push(funcOrFuncs: asyncFunc | asyncFunc[], callback: callback | groupCallback) {
 

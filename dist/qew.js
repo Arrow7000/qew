@@ -149,4 +149,4 @@ module.exports = Qew;
  * qew.push(asyncFunc[], groupCallback); { error, result }[]
  *
  */
-// const q = new Qew(2, 100) 
+// const q = new Qew(2, 100)

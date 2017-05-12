@@ -19,11 +19,11 @@ const Qew = require('./index');
 
 // qew.done(10);
 
-const randomDelay = () => Math.random() * 500;
+const randomDelay = () => Math.random() * 1000;
 
 
-const qew = new Qew(2, randomDelay);
-const funcs = new Array(60).fill(() => ding(1000));
+const qew = new Qew(100, randomDelay);
+const funcs = new Array(90).fill(() => ding(1000));
 qew.push(funcs, console.log);
 // qew.push(funcs, console.log);
 
