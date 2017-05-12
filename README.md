@@ -1,6 +1,8 @@
 # Qew
 
-A library for queuing and limiting simultaneous asynchronous functions. Perfect for memory intensive operations or accessing rate-limited APIs.
+A library for queuing and throttling asynchronous functions, both individually or in arrays.
+
+Perfect for managing resource-intensive processes and controlling access to rate-limited APIs.
 
 ## Installation
 
@@ -38,7 +40,7 @@ const qew = new Qew(2, 250);
 /** 
  * Push single function onto stack
  */
-const func = () => asyncFunc('param'); // async function
+const func = () => asyncFunc('param'); // async function/function that returns a promise
 
 qew.push(func, (err, result) => {
     if (err) {
