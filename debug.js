@@ -1,23 +1,31 @@
 const Qew = require('./index');
 
 
-const qew = new Qew(2, 0, (result, numDone, numFailed, done) => {
-        console.log(result);
-        console.log(numDone, numFailed);
-        // if (numDone + numFailed >= 10) {
-        //     console.log('All dunged out!!');
-        //     done();
-        // }
-    },
-    err => console.error(err),
-    () => console.log('All dunged out!!'));
+// const qew = new Qew(2, 0, (result, numDone, numFailed, done) => {
+//         console.log(result);
+//         console.log(numDone, numFailed);
+//         // if (numDone + numFailed >= 10) {
+//         //     console.log('All dunged out!!');
+//         //     done();
+//         // }
+//     },
+//     err => console.error(err),
+//     () => console.log('All dunged out!!'));
 
-for (let i = 0; i < 20; i++) {
-    qew.push(() => ding(500));
-    // qew.push(ding);
-}
+// for (let i = 0; i < 20; i++) {
+//     qew.push(() => ding(500));
+//     // qew.push(ding);
+// }
 
-qew.done(10);
+// qew.done(10);
+
+const randomDelay = () => Math.random() * 500;
+
+
+const qew = new Qew(2, randomDelay);
+const funcs = new Array(60).fill(() => ding(1000));
+qew.push(funcs, console.log);
+// qew.push(funcs, console.log);
 
 
 

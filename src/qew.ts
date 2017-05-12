@@ -1,17 +1,42 @@
-type onComplete = (promResult: any, numFulfilled: number, numRejected: number, done: () => void) => void;
-type onDone = (numFulfilled: number, numRejected: number) => void;
+type promSuccessResult = any;
+type promResult = promSuccessResult | Error;
+type callback = (err: Error, result: promSuccessResult) => void;
+type groupCallback = (resultArray: GroupResult[]) => void;
 type asyncFunc = () => Promise<any>;
-type taskHolder = Task[];
 type getNumber = () => number;
 type delay = number | getNumber;
-interface Task {
-    func: asyncFunc;
-    onResolved: onComplete;
-    onRejected: onComplete;
-    done: boolean;
+interface GroupResult {
+    result?: promSuccessResult;
+    error?: Error;
 }
 
-const doNothing = () => null;
+interface GroupResultsHolder {
+    [groupId: number]: GroupResult[];
+}
+
+interface TaskBasic {
+    func: asyncFunc;
+    done: boolean;
+    isGroupTask: boolean;
+}
+interface GroupTask extends TaskBasic {
+    groupCallback: groupCallback;
+    groupId: number;
+    index: number;
+}
+interface SingleTask extends TaskBasic {
+    callback: callback;
+}
+type taskHolder = Array<SingleTask | GroupTask[]>;
+
+function isGroupTask(task: SingleTask | GroupTask): task is GroupTask {
+    return !!task.isGroupTask;
+}
+
+function isNotDone(slot: GroupResult | null) {
+    return !slot;
+}
+
 
 
 class Qew {
@@ -21,114 +46,150 @@ class Qew {
      */
     private max: number;
     private delay: delay;
-    private isDone: boolean;
-    private onResolved: onComplete;
-    private onRejected: onComplete;
+
     private tasks: taskHolder;
-    private executing: taskHolder;
-    private minDone: number;
-    private minDoneSuccess: boolean;
-    private onDone: onDone;
+    private executing: Array<SingleTask | GroupTask>;
+    private groupResultHolders: GroupResultsHolder;
 
     /**
      * Internal state variables
      */
-    private numFulfilled: number;
-    private numRejected: number;
+    private inGroup: boolean;
+    private groupId: number;
 
-    constructor(maxConcurrent: number = 1,
-        delay: delay = 0,
-        onResolved: onComplete = null,
-        onRejected: onComplete = null,
-        onDone: onDone = doNothing) {
+    constructor(maxConcurrent: number = 1, delay: delay = 0) {
+
         if (maxConcurrent < 1) {
             throw new Error('Max concurrent functions needs to be at least 1');
         }
         this.max = maxConcurrent;
         this.delay = delay;
-        this.onResolved = onResolved;
-        this.onRejected = onRejected;
 
         this.tasks = [];
         this.executing = [];
-        this.numFulfilled = 0;
-        this.numRejected = 0;
-        this.isDone = false;
-        this.minDone = null;
-        this.minDoneSuccess = false;
-        this.onDone = onDone;
-        this.done = this.done.bind(this);
+        this.groupResultHolders = {};
+        this.groupId = 0;
     }
 
-    public push(func: asyncFunc | asyncFunc[], onResolved?: onComplete, onRejected?: onComplete) {
-        if (this.isDone) {
-            throw new Error('Cannot push onto finished qew');
-        }
+    public push(func: asyncFunc, cb?: callback): this;
+    public push(funcs: asyncFunc[], cb?: groupCallback): this;
 
-        if (Array.isArray(func)) {
-            func.forEach(func => {
-                this.addTask(func, onResolved, onRejected);
+    public push(funcOrFuncs: asyncFunc | asyncFunc[], callback: callback | groupCallback) {
+
+        if (Array.isArray(funcOrFuncs)) {
+
+            const funcs = funcOrFuncs;
+            const tasks: GroupTask[] = funcs.map((func, i) => {
+                return {
+                    func,
+                    isGroupTask: true,
+                    groupCallback: <groupCallback>callback,
+                    done: false,
+                    groupId: this.groupId,
+                    index: i
+                };
             });
+
+            this.groupResultHolders[this.groupId] = new Array(tasks.length).fill(null);
+
+            this.groupId++;
+            this.tasks = [...this.tasks, tasks];
+
         } else {
-            this.addTask(func, onResolved, onRejected);
+            const func = funcOrFuncs;
+            const task: SingleTask = {
+                func,
+                isGroupTask: false,
+                callback: <callback>callback,
+                done: false,
+            };
+
+            this.tasks = [...this.tasks, task];
         }
+
+        this.tryMove();
 
         return this;
     }
 
-    public done(afterNum: number = null, onlySuccess: boolean = false) {
-        if (!this.isDone) {
-            if (afterNum) {
-                this.minDone = afterNum;
-                this.minDoneSuccess = onlySuccess;
+    private tryMove() {
+        const isFree = this.executing.length < this.max;
+        const hasWaiting = this.tasks.length > 0;
+        if (isFree && hasWaiting) {
+            this.move();
+        }
+    }
+
+    private move() {
+        const nextUp = this.tasks[0];
+
+        if (Array.isArray(nextUp)) {
+
+            const groupDoneAfterThis = nextUp.length < 2;
+            const task = nextUp[0];
+
+            if (groupDoneAfterThis) {
+                this.tasks = this.tasks.slice(1);
             } else {
-                this.isDone = true;
-                this.tasks = [];
-                this.executing = [];
-
-                this.onDone(this.numFulfilled, this.numRejected);
+                const restGroupTasks = nextUp.slice(1);
+                const otherTasks = this.tasks.slice(1);
+                this.tasks = [...otherTasks, restGroupTasks];
             }
+
+            this.executing = [...this.executing, task]; // push task to executing
+            this.execute(task);
+        } else {
+            const task = nextUp;
+            this.tasks = this.tasks.slice(1); // remove task from waiting list
+            this.executing = [...this.executing, task]; // push task to executing
+            this.execute(task);
         }
-
-        return this;
-    }
-
-
-    private addTask(func: asyncFunc,
-        onResolved?: onComplete,
-        onRejected?: onComplete): void {
-
-        const task: Task = {
-            func,
-            onResolved,
-            onRejected,
-            done: false,
-        };
-
-        this.tasks = [...this.tasks, task];
 
         this.tryMove();
     }
 
-    private execute(task: Task) {
-        const { func, onResolved, onRejected } = task;
-        const fulfill = onResolved || this.onResolved;
-        const reject = onRejected || this.onRejected;
+    private execute(task: SingleTask | GroupTask) {
+        const { func } = task;
 
-        func()
-            .then(result => {
-                this.numFulfilled++;
-                fulfill(result, this.numFulfilled, this.numRejected, this.done);
-                this.doAfterEach(task);
-            })
-            .catch(error => {
-                this.numRejected++;
-                reject(error, this.numFulfilled, this.numRejected, this.done);
-                this.doAfterEach(task);
-            });
+        if (isGroupTask(task)) {
+            const { groupId, index } = task;
+
+            func()
+                .then(result => {
+                    this.groupResultHolders[groupId][index] = {
+                        error: null,
+                        result
+                    };
+
+                    this.doAfterEachGroupTask(task);
+                    this.doAfterEach(task);
+                })
+                .catch(error => {
+                    this.groupResultHolders[groupId][index] = {
+                        error,
+                        result: null
+                    };
+
+                    this.doAfterEachGroupTask(task);
+                    this.doAfterEach(task);
+                });
+
+        } else {
+            const { callback } = task;
+
+            func()
+                .then(result => {
+                    callback(null, result);
+                    this.doAfterEach(task);
+                })
+                .catch(error => {
+                    callback(error, null);
+                    this.doAfterEach(task);
+                });
+        }
     }
 
-    private doAfterEach(task: Task) {
+    private doAfterEach(task: SingleTask | GroupTask) {
         const delayMs = typeof this.delay === 'function' ? this.delay() : this.delay;
         setTimeout(() => {
             task.done = true;
@@ -138,30 +199,28 @@ class Qew {
         }, delayMs);
     }
 
-    private move() {
-        const task = this.tasks[0]; // get task
-        this.tasks = this.tasks.slice(1); // remove task from waiting list
-        this.executing = [...this.executing, task]; // push task to executing
-        this.execute(task);
-    }
-
-    private tryMove() {
-        const isFree = this.executing.length < this.max;
-        const hasWaiting = this.tasks.length > 0;
-        let numDone = this.numFulfilled;
-        if (this.minDoneSuccess) {
-            numDone += this.numRejected;
-        }
-        const isDone = this.minDone && numDone >= this.minDone;
-
-        if (isDone) {
-            this.done();
-        } else if (isFree && hasWaiting) {
-            this.move();
+    private doAfterEachGroupTask(task: GroupTask) {
+        const { groupId, index, groupCallback } = task;
+        const groupResults = this.groupResultHolders[groupId];
+        const allDone = !groupResults.some(isNotDone);
+        if (allDone) {
+            groupCallback(groupResults);
+            delete this.groupResultHolders[groupId];
         }
     }
 }
 
-const qew = new Qew();
+export = Qew;
 
-export = Qew; 
+/**
+ * new Qew API
+ *
+ * // const qew = new Qew(1, 250)
+ * //     .each(eachCallback)
+ * //     .group(groupCallback);
+ * 
+ * qew.push(asyncFunc, eachCallback); // (error, result)
+ * qew.push(asyncFunc[], groupCallback); { error, result }[]
+ *
+ */
+// const q = new Qew(2, 100)
