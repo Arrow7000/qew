@@ -22,7 +22,7 @@ const Qew = require('./index');
 const randomDelay = () => Math.random() * 1000;
 
 
-const qew = new Qew(100, randomDelay);
+const qew = new Qew(10);
 const funcs = new Array(90).fill(() => ding(1000));
 qew.push(funcs, console.log);
 // qew.push(funcs, console.log);
