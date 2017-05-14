@@ -54,7 +54,6 @@ class Qew {
     /**
      * Internal state variables
      */
-    private inGroup: boolean;
     private groupId: number;
 
     constructor(maxConcurrent: number = 1, delay: delay = 0) {
