@@ -219,8 +219,11 @@ export = Qew;
  * //     .each(eachCallback)
  * //     .group(groupCallback);
  * 
- * qew.push(asyncFunc, eachCallback); // (error, result)
- * qew.push(asyncFunc[], groupCallback); { error, result }[]
+ * qew.push(asyncFunc, eachCallback: (error, result): void): this;
+ * qew.push(asyncFunc[], groupCallback: ({ error, result }[]): void): this;
+ *
+ * qew.pushProm(asyncFunc): Promise<any, any>;
+ * qew.pushProm(asyncFunc[]): Promise<{ error, result }[]>;
  *
  */
 // const q = new Qew(2, 100)
