@@ -136,7 +136,7 @@ Qew.push(func: () => Promise<any>, cb: (err: Error, result?: any) => void): this
 Qew.push(funcs: (() => Promise<any>)[], cb: (resultArray: { result: any, error: Error }}[]) => void): this;
 
 Qew.pushProm(func: () => Promise<any>): Promise<any>;
-Qew.pushProm(funcs:( () => Promise<any>)[]): Promise<{ result: any, error: Error }}[]>;
+Qew.pushProm(funcs:(() => Promise<any>)[]): Promise<{ result: any, error: Error }[]>;
 ```
 
 ## Contributing
