@@ -8,6 +8,7 @@ Perfect for managing resource-intensive processes and controlling access to rate
 1. [Examples](#examples)
 1. [Use cases](#use-cases)
 1. [API](#api)
+1. [Contributing](#contributing)
 
 ## Installation
 
