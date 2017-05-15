@@ -132,6 +132,8 @@ qew.push(['g', 'h', 'i'].map(makeFunc), arrayCallback);
 ## API
 
 ```typescript
+constructor Qew(maxConcurrent: number = 1, delay: delay = 0): Qew;
+
 Qew.push(func: () => Promise<T>, cb: (err: Error, result?: T) => void): this;
 Qew.push(funcs: (() => Promise<T>)[], cb: (resultArray: { result: T, error: Error }}[]) => void): this;
 
