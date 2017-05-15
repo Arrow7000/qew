@@ -29,8 +29,8 @@ function makeGroupTask(func: asyncFunc, groupCallback: groupCallback, groupId: n
     };
 }
 
-function makeCallback(resolve: resolve, reject: reject): callback {
-    return (error, result) => {
+function makeCallback<T>(resolve: resolve<T>, reject: reject): callback {
+    return (error: Error, result: T) => {
         if (error) {
             reject(error);
         } else {
@@ -39,7 +39,7 @@ function makeCallback(resolve: resolve, reject: reject): callback {
     };
 }
 
-function makeGroupCallback(resolve: resolve): groupCallback {
+function makeGroupCallback<T>(resolve: resolve<T>): groupCallback {
     return (resultArray) => {
         resolve(resultArray);
     };
@@ -108,7 +108,6 @@ class Qew {
 
     public pushProm<T>(funcs: asyncFunc[]): Promise<(GroupResult<T>)[]>;
     public pushProm<T>(func: asyncFunc): Promise<T>;
-
     public pushProm<T>(funcOrFuncs: asyncFunc | asyncFunc[]): Promise<(GroupResult<T>)[] | T> {
         if (Array.isArray(funcOrFuncs)) {
             const funcs = funcOrFuncs;

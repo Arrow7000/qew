@@ -12,7 +12,7 @@ interface GroupResultsHolder<T> {
     [groupId: number]: (GroupResult<T>)[];
 }
 
-type resolve = (result: any) => void;
+type resolve<T> = (result: T) => void;
 type reject = (error: Error) => void;
 
 
@@ -35,4 +35,4 @@ interface GroupTask extends TaskBasic {
     index: number;
 }
 
-type taskHolder = Array<SingleTask | GroupTask[]>;
+type taskHolder = (SingleTask | GroupTask[])[];
