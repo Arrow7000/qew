@@ -135,7 +135,7 @@ qew.push(['g', 'h', 'i'].map(makeFunc), arrayCallback);
 constructor Qew(maxConcurrent: number = 1, delay: number | (() => number) = 0): Qew;
 
 Qew.push(func: () => Promise<T>, cb: (err: Error, result?: T) => void): this;
-Qew.push(funcs: (() => Promise<T>)[], cb: (resultArray: { result: T, error: Error }}[]) => void): this;
+Qew.push(funcs: (() => Promise<T>)[], cb: (resultArray: { result: T, error: Error }[]) => void): this;
 
 Qew.pushProm(func: () => Promise<T>): Promise<T>;
 Qew.pushProm(funcs:(() => Promise<T>)[]): Promise<{ result: T, error: Error }[]>;
