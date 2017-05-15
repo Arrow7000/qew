@@ -4,6 +4,11 @@ A library for queuing and throttling asynchronous functions, both individually o
 
 Perfect for managing resource-intensive processes and controlling access to rate-limited APIs.
 
+1. [Installation](#installation)
+1. [Examples](#examples)
+1. [Use cases](#use-cases)
+1. [API](#api)
+
 ## Installation
 
 Qew is available on npm. Install via 
