@@ -262,4 +262,5 @@ export = Qew;
  * qew.pushProm(asyncFunc[]): Promise<({ error, result })[]>;
  *
  */
+
 // const q = new Qew(2, 100)
