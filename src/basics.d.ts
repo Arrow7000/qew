@@ -1,5 +1,3 @@
-// type promSuccessResult = any;
-// type promResult = any | Error;
 type callback = <T>(err: Error, result?: T) => void;
 type groupCallback = <T>(resultArray: GroupResult<T>[]) => void;
 type asyncFunc = <T>() => Promise<T>;
@@ -36,13 +34,5 @@ interface GroupTask extends TaskBasic {
     groupId: number;
     index: number;
 }
-
-// interface PromGroupTask extends TaskBasic {
-//     promResolve: resolve;
-//     promReject: reject;
-//     groupId: number;
-//     index: number;
-// }
-
 
 type taskHolder = Array<SingleTask | GroupTask[]>;
