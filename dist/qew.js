@@ -1,9 +1,43 @@
 "use strict";
+/// <reference path="basics.d.ts" />
 function isGroupTask(task) {
     return !!task.isGroupTask;
 }
 function isNotDone(slot) {
     return !slot;
+}
+function makeSingleTask(func, callback) {
+    return {
+        func: func,
+        isGroupTask: false,
+        callback: callback,
+        done: false,
+    };
+}
+function makeGroupTask(func, groupCallback, groupId, index) {
+    return {
+        func: func,
+        isGroupTask: true,
+        groupCallback: groupCallback,
+        done: false,
+        groupId: groupId,
+        index: index
+    };
+}
+function makeCallback(resolve, reject) {
+    return function (error, result) {
+        if (error) {
+            reject(error);
+        }
+        else {
+            resolve(result);
+        }
+    };
+}
+function makeGroupCallback(resolve) {
+    return function (resultArray) {
+        resolve(resultArray);
+    };
 }
 var Qew = (function () {
     function Qew(maxConcurrent, delay) {
@@ -24,14 +58,7 @@ var Qew = (function () {
         if (Array.isArray(funcOrFuncs)) {
             var funcs = funcOrFuncs;
             var tasks = funcs.map(function (func, i) {
-                return {
-                    func: func,
-                    isGroupTask: true,
-                    groupCallback: callback,
-                    done: false,
-                    groupId: _this.groupId,
-                    index: i
-                };
+                return makeGroupTask(func, callback, _this.groupId, i);
             });
             this.groupResultHolders[this.groupId] = new Array(tasks.length).fill(null);
             this.groupId++;
@@ -39,16 +66,40 @@ var Qew = (function () {
         }
         else {
             var func = funcOrFuncs;
-            var task = {
-                func: func,
-                isGroupTask: false,
-                callback: callback,
-                done: false,
-            };
+            var task = makeSingleTask(func, callback);
             this.tasks = this.tasks.concat([task]);
         }
         this.tryMove();
         return this;
+    };
+    Qew.prototype.pushProm = function (funcOrFuncs) {
+        var _this = this;
+        if (Array.isArray(funcOrFuncs)) {
+            var funcs = funcOrFuncs;
+            var groupCallback_1;
+            var promToReturn = new Promise(function (resolve, reject) {
+                groupCallback_1 = makeGroupCallback(resolve);
+            });
+            var tasks = funcs.map(function (func, i) {
+                return makeGroupTask(func, groupCallback_1, _this.groupId, i);
+            });
+            this.groupResultHolders[this.groupId] = new Array(tasks.length).fill(null);
+            this.groupId++;
+            this.tasks = this.tasks.concat([tasks]);
+            this.tryMove();
+            return promToReturn;
+        }
+        else {
+            var func = funcOrFuncs;
+            var callback_1;
+            var promToReturn = new Promise(function (resolve, reject) {
+                callback_1 = makeCallback(resolve, reject);
+            });
+            var task = makeSingleTask(func, callback_1);
+            this.tasks = this.tasks.concat([task]);
+            this.tryMove();
+            return promToReturn;
+        }
     };
     Qew.prototype.tryMove = function () {
         var isFree = this.executing.length < this.max;
@@ -105,14 +156,14 @@ var Qew = (function () {
             });
         }
         else {
-            var callback_1 = task.callback;
+            var callback_2 = task.callback;
             func()
                 .then(function (result) {
-                callback_1(null, result);
+                callback_2(null, result);
                 _this.doAfterEach(task);
             })
                 .catch(function (error) {
-                callback_1(error, null);
+                callback_2(error);
                 _this.doAfterEach(task);
             });
         }
@@ -145,8 +196,11 @@ module.exports = Qew;
  * //     .each(eachCallback)
  * //     .group(groupCallback);
  *
- * qew.push(asyncFunc, eachCallback); // (error, result)
- * qew.push(asyncFunc[], groupCallback); { error, result }[]
+ * qew.push(asyncFunc, eachCallback: (error, result): void): this;
+ * qew.push(asyncFunc[], groupCallback: ({ error, result }[]): void): this;
+ *
+ * qew.pushProm(asyncFunc): Promise<any, any>;
+ * qew.pushProm(asyncFunc[]): Promise<({ error, result })[]>;
  *
  */
 // const q = new Qew(2, 100)

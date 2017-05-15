@@ -1,42 +1,49 @@
-type promSuccessResult = any;
-type promResult = promSuccessResult | Error;
-type callback = (err: Error, result: promSuccessResult) => void;
-type groupCallback = (resultArray: GroupResult[]) => void;
-type asyncFunc = () => Promise<any>;
-type getNumber = () => number;
-type delay = number | getNumber;
-interface GroupResult {
-    result: promSuccessResult | null;
-    error: Error | null;
-}
+/// <reference path="basics.d.ts" />
 
-interface GroupResultsHolder {
-    [groupId: number]: GroupResult[];
-}
-
-interface TaskBasic {
-    func: asyncFunc;
-    done: boolean;
-    isGroupTask: boolean;
-}
-interface GroupTask extends TaskBasic {
-    groupCallback: groupCallback;
-    groupId: number;
-    index: number;
-}
-interface SingleTask extends TaskBasic {
-    callback: callback;
-}
-type taskHolder = Array<SingleTask | GroupTask[]>;
 
 function isGroupTask(task: SingleTask | GroupTask): task is GroupTask {
     return !!task.isGroupTask;
 }
 
-function isNotDone(slot: GroupResult | null) {
+function isNotDone(slot: GroupResult | null): boolean {
     return !slot;
 }
 
+function makeSingleTask(func: asyncFunc, callback: callback): SingleTask {
+    return {
+        func,
+        isGroupTask: false,
+        callback,
+        done: false,
+    };
+}
+
+function makeGroupTask(func: asyncFunc, groupCallback: groupCallback, groupId: number, index: number): GroupTask {
+    return {
+        func,
+        isGroupTask: true,
+        groupCallback,
+        done: false,
+        groupId,
+        index
+    };
+}
+
+function makeCallback(resolve: resolve, reject: reject): callback {
+    return (error, result) => {
+        if (error) {
+            reject(error);
+        } else {
+            resolve(result);
+        }
+    };
+}
+
+function makeGroupCallback(resolve: resolve): groupCallback {
+    return (resultArray) => {
+        resolve(resultArray);
+    };
+}
 
 
 class Qew {
@@ -70,23 +77,16 @@ class Qew {
         this.groupId = 0;
     }
 
-    public push(func: asyncFunc, cb: callback): this;
     public push(funcs: asyncFunc[], cb: groupCallback): this;
-
+    public push(func: asyncFunc, cb: callback): this;
     public push(funcOrFuncs: asyncFunc | asyncFunc[], callback: callback | groupCallback) {
 
         if (Array.isArray(funcOrFuncs)) {
 
             const funcs = funcOrFuncs;
             const tasks: GroupTask[] = funcs.map((func, i) => {
-                return {
-                    func,
-                    isGroupTask: true,
-                    groupCallback: <groupCallback>callback,
-                    done: false,
-                    groupId: this.groupId,
-                    index: i
-                };
+                return makeGroupTask(func, <groupCallback>callback, this.groupId, i);
+
             });
 
             this.groupResultHolders[this.groupId] = new Array(tasks.length).fill(null);
@@ -96,12 +96,7 @@ class Qew {
 
         } else {
             const func = funcOrFuncs;
-            const task: SingleTask = {
-                func,
-                isGroupTask: false,
-                callback: <callback>callback,
-                done: false,
-            };
+            const task: SingleTask = makeSingleTask(func, <callback>callback);
 
             this.tasks = [...this.tasks, task];
         }
@@ -109,6 +104,48 @@ class Qew {
         this.tryMove();
 
         return this;
+    }
+
+    public pushProm(funcs: asyncFunc[]): Promise<GroupResult[]>;
+    public pushProm(func: asyncFunc): Promise<any>;
+
+    public pushProm(funcOrFuncs: asyncFunc | asyncFunc[]): Promise<GroupResult[] | any> {
+        if (Array.isArray(funcOrFuncs)) {
+            const funcs = funcOrFuncs;
+
+            let groupCallback: groupCallback;
+            const promToReturn = new Promise((resolve, reject) => {
+                groupCallback = makeGroupCallback(resolve);
+            });
+            const tasks: GroupTask[] = funcs.map((func, i) => {
+                return makeGroupTask(func, groupCallback, this.groupId, i);
+            });
+
+            this.groupResultHolders[this.groupId] = new Array(tasks.length).fill(null);
+
+            this.groupId++;
+            this.tasks = [...this.tasks, tasks];
+
+            this.tryMove();
+
+            return promToReturn;
+        } else {
+            const func = funcOrFuncs;
+
+            let callback: callback;
+            const promToReturn = new Promise((resolve, reject) => {
+                callback = makeCallback(resolve, reject);
+            });
+
+            const task: SingleTask = makeSingleTask(func, callback);
+
+            this.tasks = [...this.tasks, task];
+
+            this.tryMove();
+
+            return promToReturn;
+        }
+
     }
 
     private tryMove() {
@@ -182,7 +219,7 @@ class Qew {
                     this.doAfterEach(task);
                 })
                 .catch(error => {
-                    callback(error, null);
+                    callback(error);
                     this.doAfterEach(task);
                 });
         }
@@ -222,7 +259,7 @@ export = Qew;
  * qew.push(asyncFunc[], groupCallback: ({ error, result }[]): void): this;
  *
  * qew.pushProm(asyncFunc): Promise<any, any>;
- * qew.pushProm(asyncFunc[]): Promise<{ error, result }[]>;
+ * qew.pushProm(asyncFunc[]): Promise<({ error, result })[]>;
  *
  */
 // const q = new Qew(2, 100)

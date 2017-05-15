@@ -9,7 +9,7 @@
         "watch": "tsc -w",
         "prepublish": "npm run build"
     },
-    "keywords": [],
+    "keywords": ["queue", "async"],
     "author": "",
     "license": "ISC",
     "repository": "Arrow7000/qew",

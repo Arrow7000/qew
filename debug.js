@@ -23,20 +23,33 @@ const randomDelay = () => Math.random() * 1000;
 
 
 const qew = new Qew(3);
-const funcs = new Array(10).fill(() => ding(1000));
-qew.push(funcs, console.log);
-// qew.push(funcs, console.log);
+const funcs1 = new Array(10).fill(() => ding(1000));
 
+qew.push(funcs1, console.log);
+
+for (let i = 0; i < 5; i++) {
+    const prom = qew.pushProm(() => ding(5000));
+
+    prom
+        .then(result => console.log('result is', result))
+        .catch(err => console.error(err));
+
+}
+
+const funcs2 = new Array(10).fill(() => ding(100));
+
+qew.pushProm(funcs2)
+    .then(console.log)
 
 
 function ding(delay) {
     return new Promise((resolve, reject) => {
         console.log('running dinger');
         setTimeout(function() {
-            if (Math.random() < .95) {
+            if (Math.random() < .75) {
                 resolve('ding!');
             } else {
-                reject('dong...')
+                reject(new Error('dong...'));
             }
         }, delay);
     });
