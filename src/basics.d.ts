@@ -1,17 +1,17 @@
-type promSuccessResult = any;
-type promResult = promSuccessResult | Error;
-type callback = (err: Error, result?: promSuccessResult) => void;
-type groupCallback = (resultArray: GroupResult[]) => void;
-type asyncFunc = () => Promise<any>;
+// type promSuccessResult = any;
+// type promResult = any | Error;
+type callback = <T>(err: Error, result?: T) => void;
+type groupCallback = <T>(resultArray: GroupResult<T>[]) => void;
+type asyncFunc = <T>() => Promise<T>;
 type getNumber = () => number;
 type delay = number | getNumber;
-interface GroupResult {
-    result: promSuccessResult;
+interface GroupResult<T> {
+    result: T;
     error: Error;
 }
 
-interface GroupResultsHolder {
-    [groupId: number]: GroupResult[];
+interface GroupResultsHolder<T> {
+    [groupId: number]: (GroupResult<T>)[];
 }
 
 type resolve = (result: any) => void;

@@ -5,7 +5,7 @@ function isGroupTask(task: SingleTask | GroupTask): task is GroupTask {
     return !!task.isGroupTask;
 }
 
-function isNotDone(slot: GroupResult | null): boolean {
+function isNotDone(slot: GroupResult<any> | null): boolean {
     return !slot;
 }
 
@@ -56,7 +56,7 @@ class Qew {
 
     private tasks: taskHolder;
     private executing: Array<SingleTask | GroupTask>;
-    private groupResultHolders: GroupResultsHolder;
+    private groupResultHolders: GroupResultsHolder<any>;
 
     /**
      * Internal state variables
@@ -106,10 +106,10 @@ class Qew {
         return this;
     }
 
-    public pushProm(funcs: asyncFunc[]): Promise<GroupResult[]>;
-    public pushProm(func: asyncFunc): Promise<any>;
+    public pushProm<T>(funcs: asyncFunc[]): Promise<(GroupResult<T>)[]>;
+    public pushProm<T>(func: asyncFunc): Promise<T>;
 
-    public pushProm(funcOrFuncs: asyncFunc | asyncFunc[]): Promise<GroupResult[] | any> {
+    public pushProm<T>(funcOrFuncs: asyncFunc | asyncFunc[]): Promise<(GroupResult<T>)[] | T> {
         if (Array.isArray(funcOrFuncs)) {
             const funcs = funcOrFuncs;
 
