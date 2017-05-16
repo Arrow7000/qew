@@ -4,6 +4,9 @@ A library for queuing and throttling asynchronous functions, both individually o
 
 Perfect for managing resource-intensive processes and controlling access to rate-limited APIs.
 
+![NPM stats](https://nodei.co/npm/qew.png?downloads=true&downloadRank=true&stars=true)
+![NPM downloads histogram](https://nodei.co/npm-dl/qew.png?months=1&height=3)
+
 1. [Installation](#installation)
 1. [API](#api)
     1. [`Qew.constructor`](#-new-qew-maxconcurrency-1-delayordelayfunc-0-)
