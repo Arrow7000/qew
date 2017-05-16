@@ -212,7 +212,7 @@ qew.push(['d', 'e', 'f'].map(makeFunc), arrayCallback);
 qew.push(['g', 'h', 'i'].map(makeFunc), arrayCallback);
 ```
 
-## methods and type signatures
+## Methods and type signatures
 
 ```typescript
 constructor Qew(maxConcurrent: number = 1, delay: number | (() => number) = 0): Qew;
