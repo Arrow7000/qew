@@ -1,6 +1,6 @@
 {
     "name": "qew",
-    "version": "0.6.2-alpha.4",
+    "version": "0.6.2-alpha.5",
     "description": "Queue and throttle asynchronous functions",
     "main": "index.js",
     "scripts": {
