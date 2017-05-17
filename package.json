@@ -1,9 +1,8 @@
 {
     "name": "qew",
-    "version": "0.6.2-alpha",
+    "version": "0.6.2-alpha.1",
     "description": "Queue and throttle asynchronous functions",
     "main": "index.js",
-    "types": "./src/qew.d.ts",
     "scripts": {
         "build": "tsc",
         "test": "echo \"Error: no test specified\" && exit 1",
