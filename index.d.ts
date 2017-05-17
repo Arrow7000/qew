@@ -50,3 +50,5 @@ declare class Qew {
     public pushProm<T>(funcs: asyncFunc[]): Promise<(GroupResult<T>)[]>;
     public pushProm<T>(func: asyncFunc): Promise<T>;
 }
+
+export = Qew;
