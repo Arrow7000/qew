@@ -235,7 +235,7 @@ class Qew {
     }
 
     private doAfterEachGroupTask(task: GroupTask) {
-        const { groupId, index, groupCallback } = task;
+        const { groupId, groupCallback } = task;
         const groupResults = this.groupResultHolders[groupId];
         const allDone = !groupResults.some(isNotDone);
         if (allDone) {
