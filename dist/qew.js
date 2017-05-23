@@ -178,7 +178,7 @@ var Qew = (function () {
         }, delayMs);
     };
     Qew.prototype.doAfterEachGroupTask = function (task) {
-        var groupId = task.groupId, index = task.index, groupCallback = task.groupCallback;
+        var groupId = task.groupId, groupCallback = task.groupCallback;
         var groupResults = this.groupResultHolders[groupId];
         var allDone = !groupResults.some(isNotDone);
         if (allDone) {
