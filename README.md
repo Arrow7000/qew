@@ -136,7 +136,7 @@ Qew.pushProm(func: () => Promise<T>): Promise<T>;
 ```js
 // returns a promise, that runs when it is its turn in the queue.
 // will resolve or reject depending on asyncFunc's resolution
-const prom = Qew.pushProm(asyncFunc[]);
+const prom = Qew.pushProm(asyncFunc);
 
 prom
     .then(result => ...)
