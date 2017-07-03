@@ -1,4 +1,4 @@
-export declare namespace qew {
+export namespace qew {
     interface GroupSuccessResult<T> {
         result: T;
     }
