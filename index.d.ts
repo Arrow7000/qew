@@ -14,8 +14,8 @@ declare class Qew {
     public push(func: asyncFunc, cb: callback): this;
     public push(funcs: asyncFunc[], cb: groupCallback): this;
 
-    public pushProm<T>(func: asyncFunc): Promise<T>;
-    public pushProm<T>(funcs: asyncFunc[]): Promise<(GroupResult<T>)[]>;
+    public pushProm<T>(func: () => Promise<T>): Promise<T>;
+    public pushProm<T>(funcs: (() => Promise<T>)[]): Promise<(GroupResult<T>)[]>;
 }
 
 export = Qew;
