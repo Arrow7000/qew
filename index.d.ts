@@ -9,7 +9,7 @@ interface GroupResult<T> {
 }
 
 declare class Qew {
-    constructor(maxConcurrent: number = 1, delay: delay = 0);
+    constructor(maxConcurrent: number, delay: delay);
 
     public push(func: asyncFunc, cb: callback): this;
     public push(funcs: asyncFunc[], cb: groupCallback): this;
