@@ -245,7 +245,11 @@ class Qew {
     }
 }
 
-export = Qew;
+export default Qew;
+
+export function isResolved<T>(result: GroupResult<T>): result is GroupSuccessResult<T> {
+    return !!(<GroupSuccessResult<T>>result).result;
+}
 
 /**
  * new Qew API

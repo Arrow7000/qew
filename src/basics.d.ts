@@ -3,10 +3,16 @@ type groupCallback = <T>(resultArray: GroupResult<T>[]) => void;
 type asyncFunc = <T>() => Promise<T>;
 type getNumber = () => number;
 type delay = number | getNumber;
-interface GroupResult<T> {
+
+interface GroupSuccessResult<T> {
     result: T;
+}
+
+interface GroupFailResult<T> {
     error: Error;
 }
+
+type GroupResult<T> = GroupSuccessResult<T> | GroupFailResult<T>;
 
 interface GroupResultsHolder<T> {
     [groupId: number]: (GroupResult<T>)[];
