@@ -106,9 +106,9 @@ class Qew {
         return this;
     }
 
-    public pushProm<T>(funcs: asyncFunc[]): Promise<(GroupResult<T>)[]>;
+    public pushProm<T>(funcs: asyncFunc[]): Promise<(GroupResult<T>[])>;
     public pushProm<T>(func: asyncFunc): Promise<T>;
-    public pushProm<T>(funcOrFuncs: asyncFunc | asyncFunc[]): Promise<(GroupResult<T>)[] | T> {
+    public pushProm<T>(funcOrFuncs: asyncFunc | asyncFunc[]): Promise<GroupResult<T>[] | T> {
         if (Array.isArray(funcOrFuncs)) {
             const funcs = funcOrFuncs;
 
