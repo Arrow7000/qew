@@ -84,6 +84,9 @@ class Qew {
         if (Array.isArray(funcOrFuncs)) {
 
             const funcs = funcOrFuncs;
+            if (funcs.length < 1) {
+
+            }
             const tasks: GroupTask[] = funcs.map((func, i) => {
                 return makeGroupTask(func, <groupCallback>callback, this.groupId, i);
 
@@ -111,6 +114,10 @@ class Qew {
     public pushProm<T>(funcOrFuncs: asyncFunc | asyncFunc[]): Promise<GroupResult<T>[] | T> {
         if (Array.isArray(funcOrFuncs)) {
             const funcs = funcOrFuncs;
+
+            if (funcs.length < 1) { // is empty array
+                return Promise.resolve([]);
+            }
 
             let groupCallback: groupCallback;
             const promToReturn = new Promise((resolve, reject) => {
@@ -159,20 +166,23 @@ class Qew {
         const nextUp = this.tasks[0];
 
         if (Array.isArray(nextUp)) {
+            const group = nextUp;
+            const groupDoneAfterThis = group.length < 2;
+            const task = group[0];
+            if (task) {
+                if (groupDoneAfterThis) {
+                    this.tasks = this.tasks.slice(1);
+                } else {
+                    const restGroupTasks = group.slice(1);
+                    const otherTasks = this.tasks.slice(1);
+                    this.tasks = [...otherTasks, restGroupTasks];
+                }
 
-            const groupDoneAfterThis = nextUp.length < 2;
-            const task = nextUp[0];
-
-            if (groupDoneAfterThis) {
-                this.tasks = this.tasks.slice(1);
+                this.executing = [...this.executing, task]; // push task to executing
+                this.execute(task);
             } else {
-                const restGroupTasks = nextUp.slice(1);
-                const otherTasks = this.tasks.slice(1);
-                this.tasks = [...otherTasks, restGroupTasks];
+                // handle group being empty
             }
-
-            this.executing = [...this.executing, task]; // push task to executing
-            this.execute(task);
         } else {
             const task = nextUp;
             this.tasks = this.tasks.slice(1); // remove task from waiting list
