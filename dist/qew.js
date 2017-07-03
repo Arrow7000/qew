@@ -1,5 +1,6 @@
 "use strict";
 /// <reference path="basics.d.ts" />
+Object.defineProperty(exports, "__esModule", { value: true });
 function isGroupTask(task) {
     return !!task.isGroupTask;
 }
@@ -188,7 +189,11 @@ var Qew = (function () {
     };
     return Qew;
 }());
-module.exports = Qew;
+exports.default = Qew;
+function isResolved(result) {
+    return !!result.result;
+}
+exports.isResolved = isResolved;
 /**
  * new Qew API
  *

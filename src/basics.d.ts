@@ -8,11 +8,11 @@ interface GroupSuccessResult<T> {
     result: T;
 }
 
-interface GroupFailResult<T> {
+interface GroupFailResult {
     error: Error;
 }
 
-type GroupResult<T> = GroupSuccessResult<T> | GroupFailResult<T>;
+type GroupResult<T> = GroupSuccessResult<T> | GroupFailResult;
 
 interface GroupResultsHolder<T> {
     [groupId: number]: (GroupResult<T>)[];
