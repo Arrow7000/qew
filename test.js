@@ -1,4 +1,4 @@
-const Qew = require('./dist/qew.js').default;
+const Qew = require('./dist/qew.js');
 const q = new Qew();
 
 q.pushProm(async() => await 'hi')

@@ -1,7 +1,7 @@
 /// <reference path="basics.d.ts" />
 
 
-function isGroupTask(task: SingleTask | GroupTask): task is GroupTask {
+function isGroupTask<T>(task: SingleTask<T> | GroupTask<T>): task is GroupTask<T> {
     return !!task.isGroupTask;
 }
 
@@ -9,7 +9,7 @@ function isNotDone(slot: GroupResult<any> | null): boolean {
     return !slot;
 }
 
-function makeSingleTask(func: asyncFunc, callback: callback): SingleTask {
+function makeSingleTask<T>(func: AsyncFunc<T>, callback: Callback<T>): SingleTask<T> {
     return {
         func,
         isGroupTask: false,
@@ -18,7 +18,7 @@ function makeSingleTask(func: asyncFunc, callback: callback): SingleTask {
     };
 }
 
-function makeGroupTask(func: asyncFunc, groupCallback: groupCallback, groupId: number, index: number): GroupTask {
+function makeGroupTask<T>(func: AsyncFunc<T>, groupCallback: GroupCallback<T>, groupId: number, index: number): GroupTask<T> {
     return {
         func,
         isGroupTask: true,
@@ -29,7 +29,7 @@ function makeGroupTask(func: asyncFunc, groupCallback: groupCallback, groupId: n
     };
 }
 
-function makeCallback<T>(resolve: resolve<T>, reject: reject): callback {
+function makeCallback<T>(resolve: resolve<T>, reject: reject): Callback<T> {
     return (error: Error, result: T) => {
         if (error) {
             reject(error);
@@ -39,14 +39,14 @@ function makeCallback<T>(resolve: resolve<T>, reject: reject): callback {
     };
 }
 
-function makeGroupCallback<T>(resolve: resolve<T>): groupCallback {
+function makeGroupCallback<T>(resolve): GroupCallback<T> {
     return (resultArray) => {
         resolve(resultArray);
     };
 }
 
 
-class Qew {
+class Qew<T> {
     /**
      * Set by user
      * Not intended to be mutable
@@ -54,8 +54,8 @@ class Qew {
     private max: number;
     private delay: delay;
 
-    private tasks: taskHolder;
-    private executing: Array<SingleTask | GroupTask>;
+    private tasks: taskHolder<any>;
+    private executing: Array<SingleTask<T> | GroupTask<T>>;
     private groupResultHolders: GroupResultsHolder<any>;
 
     /**
@@ -77,9 +77,9 @@ class Qew {
         this.groupId = 0;
     }
 
-    public push(funcs: asyncFunc[], cb: groupCallback): this;
-    public push(func: asyncFunc, cb: callback): this;
-    public push(funcOrFuncs: asyncFunc | asyncFunc[], callback: callback | groupCallback) {
+    public push(funcs: AsyncFunc<T>[], cb: GroupCallback<T>): this;
+    public push(func: AsyncFunc<T>, cb: Callback<T>): this;
+    public push(funcOrFuncs: AsyncFunc<T> | AsyncFunc<T>[], callback: Callback<T> | GroupCallback<T>) {
 
         if (Array.isArray(funcOrFuncs)) {
 
@@ -87,8 +87,8 @@ class Qew {
             if (funcs.length < 1) {
 
             }
-            const tasks: GroupTask[] = funcs.map((func, i) => {
-                return makeGroupTask(func, <groupCallback>callback, this.groupId, i);
+            const tasks: GroupTask<T>[] = funcs.map((func, i) => {
+                return makeGroupTask(func, <GroupCallback<T>>callback, this.groupId, i);
 
             });
 
@@ -99,7 +99,7 @@ class Qew {
 
         } else {
             const func = funcOrFuncs;
-            const task: SingleTask = makeSingleTask(func, <callback>callback);
+            const task: SingleTask<T> = makeSingleTask(func, <Callback<T>>callback);
 
             this.tasks = [...this.tasks, task];
         }
@@ -109,9 +109,9 @@ class Qew {
         return this;
     }
 
-    public pushProm<T>(funcs: asyncFunc[]): Promise<(GroupResult<T>[])>;
-    public pushProm<T>(func: asyncFunc): Promise<T>;
-    public pushProm<T>(funcOrFuncs: asyncFunc | asyncFunc[]): Promise<GroupResult<T>[] | T> {
+    public pushProm<T>(funcs: AsyncFunc<T>[]): Promise<(GroupResult<T>[])>;
+    public pushProm<T>(func: AsyncFunc<T>): Promise<T>;
+    public pushProm<T>(funcOrFuncs: AsyncFunc<T> | AsyncFunc<T>[]): Promise<GroupResult<T>[] | T> {
         if (Array.isArray(funcOrFuncs)) {
             const funcs = funcOrFuncs;
 
@@ -119,11 +119,11 @@ class Qew {
                 return Promise.resolve([]);
             }
 
-            let groupCallback: groupCallback;
-            const promToReturn = new Promise((resolve, reject) => {
+            let groupCallback: GroupCallback<T>;
+            const promToReturn: Promise<GroupResult<T>[]> = new Promise(resolve => {
                 groupCallback = makeGroupCallback(resolve);
             });
-            const tasks: GroupTask[] = funcs.map((func, i) => {
+            const tasks: GroupTask<T>[] = funcs.map((func, i) => {
                 return makeGroupTask(func, groupCallback, this.groupId, i);
             });
 
@@ -138,12 +138,12 @@ class Qew {
         } else {
             const func = funcOrFuncs;
 
-            let callback: callback;
-            const promToReturn = new Promise((resolve, reject) => {
+            let callback: Callback<T>;
+            const promToReturn: Promise<T> = new Promise((resolve, reject) => {
                 callback = makeCallback(resolve, reject);
             });
 
-            const task: SingleTask = makeSingleTask(func, callback);
+            const task: SingleTask<T> = makeSingleTask(func, callback);
 
             this.tasks = [...this.tasks, task];
 
@@ -193,7 +193,7 @@ class Qew {
         this.tryMove();
     }
 
-    private execute(task: SingleTask | GroupTask) {
+    private execute(task: SingleTask<T> | GroupTask<T>) {
         const { func } = task;
 
         if (isGroupTask(task)) {
@@ -234,7 +234,7 @@ class Qew {
         }
     }
 
-    private doAfterEach(task: SingleTask | GroupTask) {
+    private doAfterEach(task: SingleTask<T> | GroupTask<T>) {
         const delayMs = typeof this.delay === 'function' ? this.delay() : this.delay;
         setTimeout(() => {
             task.done = true;
@@ -244,7 +244,7 @@ class Qew {
         }, delayMs);
     }
 
-    private doAfterEachGroupTask(task: GroupTask) {
+    private doAfterEachGroupTask(task: GroupTask<T>) {
         const { groupId, groupCallback } = task;
         const groupResults = this.groupResultHolders[groupId];
         const allDone = !groupResults.some(isNotDone);
@@ -255,11 +255,11 @@ class Qew {
     }
 }
 
-export default Qew;
+export = Qew;
 
-export function isResolved<T>(result: GroupResult<T>): result is GroupSuccessResult<T> {
-    return !!(<GroupSuccessResult<T>>result).result;
-}
+// export function isResolved<T>(result: GroupResult<T>): result is GroupSuccessResult<T> {
+//     return !!(<GroupSuccessResult<T>>result).result;
+// }
 
 /**
  * new Qew API

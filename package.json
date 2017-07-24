@@ -9,12 +9,18 @@
         "watch": "tsc -w",
         "prepublish": "npm run build"
     },
-    "keywords": ["queue", "async"],
+    "keywords": [
+        "queue",
+        "async"
+    ],
     "author": "",
     "license": "ISC",
     "repository": "Arrow7000/qew",
     "devDependencies": {
         "@types/node": "^7.0.18",
         "typescript": "^2.3.2"
+    },
+    "dependencies": {
+        "typescript": "^2.4.2"
     }
 }

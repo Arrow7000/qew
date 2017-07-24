@@ -25,6 +25,6 @@ declare class Qew {
     public pushProm<T>(funcs: (() => Promise<T>)[]): Promise<qew.GroupResult<T>[]>;
 }
 
-export default Qew;
+export = Qew;
 
-export function isResolved<T>(result: qew.GroupResult<T>): result is qew.GroupSuccessResult<T>;
+// export function isResolved<T>(result: qew.GroupResult<T>): result is qew.GroupSuccessResult<T>;

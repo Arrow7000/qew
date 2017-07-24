@@ -1,6 +1,6 @@
-type callback = <T>(err: Error, result?: T) => void;
-type groupCallback = <T>(resultArray: GroupResult<T>[]) => void;
-type asyncFunc = <T>() => Promise<T>;
+type Callback<T> = (err: Error, result?: T) => void;
+type GroupCallback<T> = (resultArray: GroupResult<T>[]) => void;
+type AsyncFunc<T> = () => Promise<T>;
 type getNumber = () => number;
 type delay = number | getNumber;
 
@@ -25,20 +25,20 @@ type reject = (error: Error) => void;
 /**
  * Tasks
  */
-interface TaskBasic {
-    func: asyncFunc;
+interface TaskBasic<T> {
+    func: AsyncFunc<T>;
     done: boolean;
     isGroupTask: boolean;
 }
 
-interface SingleTask extends TaskBasic {
-    callback: callback;
+interface SingleTask<T> extends TaskBasic<T> {
+    callback: Callback<T>;
 }
 
-interface GroupTask extends TaskBasic {
-    groupCallback: groupCallback;
+interface GroupTask<T> extends TaskBasic<T> {
+    groupCallback: GroupCallback<T>;
     groupId: number;
     index: number;
 }
 
-type taskHolder = (SingleTask | GroupTask[])[];
+type taskHolder<T> = (SingleTask<T> | GroupTask<T>[])[];
