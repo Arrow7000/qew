@@ -1,6 +1,6 @@
 {
     "name": "qew",
-    "version": "0.7.12",
+    "version": "0.8.12",
     "description": "Queue and throttle asynchronous functions",
     "main": "dist/qew.js",
     "scripts": {
