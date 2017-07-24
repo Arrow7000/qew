@@ -2,7 +2,7 @@
     "name": "qew",
     "version": "0.7.12",
     "description": "Queue and throttle asynchronous functions",
-    "main": "index.js",
+    "main": "dist/qew.js",
     "scripts": {
         "build": "tsc",
         "test": "echo \"Error: no test specified\" && exit 1",
