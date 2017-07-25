@@ -9,9 +9,9 @@ Perfect for managing resource-intensive processes and controlling access to rate
 
 1. [Installation](#installation)
 1. [API](#api)
-    1. [`Qew.constructor`](#-new-qew-maxconcurrency-1-delayordelayfunc-0-)
-    1. [`Qew.push`](#-qew-push-)
-    1. [`Qew.pushProm`](#-qew-pushProm-)
+    1. [`Qew.constructor`](#new-qewmaxconcurrency1-delayordelayfunc0)
+    1. [`Qew.push`](#qewpush)
+    1. [`Qew.pushProm`](#qewpushprom)
 1. [Use cases](#use-cases)
 1. [Methods & type signatures](#methods-and-type-signatures)
 1. [Contributing](#contributing)
