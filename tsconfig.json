@@ -5,7 +5,8 @@
         "module": "umd",
         "lib": [
             "es2016"
-        ]
+        ],
+        "inlineSourceMap": true
     },
     "include": [
         "./src/*"
