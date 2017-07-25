@@ -175,7 +175,7 @@ class Qew<T> {
                 } else {
                     const restGroupTasks = group.slice(1);
                     const otherTasks = this.tasks.slice(1);
-                    this.tasks = [...otherTasks, restGroupTasks];
+                    this.tasks = [restGroupTasks, ...otherTasks];
                 }
 
                 this.executing = [...this.executing, task]; // push task to executing
