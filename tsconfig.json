@@ -1,18 +1,10 @@
 {
-    "compilerOptions": {
-        "target": "es5",
-        "outDir": "dist",
-        "module": "umd",
-        "lib": [
-            "es2016"
-        ],
-        "inlineSourceMap": true
-    },
-    "include": [
-        "./src/*"
-    ],
-    "exclude": [
-        "node_modules"
-    ],
-    "compileOnSave": true
+  "compilerOptions": {
+    "target": "es5",
+    "lib": ["es2016"],
+    "strict": true,
+    "noImplicitAny": true
+  },
+  "include": ["./src/*"],
+  "exclude": ["node_modules"]
 }

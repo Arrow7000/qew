@@ -2,9 +2,13 @@
     "name": "qew",
     "version": "0.9.13",
     "description": "Queue and throttle asynchronous functions",
+    "source": "src/qew.ts",
     "main": "dist/qew.js",
+    "module": "dist/qew.mjs",
+    "unpkg": "dist/qew.umd.js",
     "scripts": {
-        "build": "tsc",
+        "start": "microbundle watch",
+        "build": "microbundle",
         "test": "echo \"Error: no test specified\" && exit 1",
         "watch": "tsc -w",
         "prepublish": "npm run build"
@@ -18,6 +22,7 @@
     "repository": "Arrow7000/qew",
     "devDependencies": {
         "@types/node": "^7.0.18",
+        "microbundle": "^0.11.0",
         "typescript": "^2.3.2"
     },
     "dependencies": {
