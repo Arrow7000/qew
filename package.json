@@ -1,8 +1,8 @@
 {
   "name": "qew",
-  "version": "0.9.13",
-  "description": "Queue and throttle asynchronous functions",
-  "source": "src/qew.ts",
+  "version": "0.10.0",
+  "description": "Queue asynchronous functions",
+  "source": "qew.ts",
   "main": "dist/qew.js",
   "module": "dist/qew.mjs",
   "unpkg": "dist/qew.umd.js",
@@ -19,17 +19,12 @@
     "async"
   ],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "repository": "Arrow7000/qew",
   "devDependencies": {
-    "@types/jest": "^24.0.13",
-    "@types/node": "^7.0.18",
-    "jest": "^24.8.0",
+    "@types/jest": "^25.1.0",
+    "jest": "^25.1.0",
     "microbundle": "^0.11.0",
-    "ts-jest": "^24.0.2",
-    "typescript": "^2.3.2"
-  },
-  "dependencies": {
-    "typescript": "^2.4.2"
+    "ts-jest": "^25.0.0"
   }
 }
