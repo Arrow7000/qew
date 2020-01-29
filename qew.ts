@@ -1,12 +1,18 @@
 type AsyncFunc<T> = () => Promise<T>;
 
-function makeTriggerablePromise<T>(): [Promise<T>, (inp: T) => void] {
+function makeTriggerablePromise<T>(): [
+  Promise<T>,
+  (inp: T) => void,
+  (error: any) => void
+] {
   let triggerResolveWith!: (inp: T) => void;
-  const promToReturn: Promise<T> = new Promise(resolve => {
+  let triggerRejectWith!: (error: any) => void;
+  const promToReturn: Promise<T> = new Promise((resolve, reject) => {
     const funcThatResolvesProm = (inp: T) => resolve(inp);
     triggerResolveWith = funcThatResolvesProm;
+    triggerRejectWith = reject;
   });
-  return [promToReturn, triggerResolveWith];
+  return [promToReturn, triggerResolveWith, triggerRejectWith];
 }
 
 export class Qew {
@@ -26,17 +32,19 @@ export class Qew {
    * @param asyncFunc the async function to push onto this queue
    */
   public push<T>(asyncFunc: AsyncFunc<T>) {
-    const [prom, resolveProm] = makeTriggerablePromise<T>();
+    const [prom, resolveProm, rejectProm] = makeTriggerablePromise<T>();
 
     const funcToRun = () => {
-      asyncFunc().then(result => {
-        resolveProm(result);
-        this.executing = this.executing - 1;
+      asyncFunc()
+        .then(result => {
+          resolveProm(result);
+          this.executing = this.executing - 1;
 
-        setTimeout(() => {
-          this.tryMove();
-        }, this.delay);
-      });
+          setTimeout(() => {
+            this.tryMove();
+          }, this.delay);
+        })
+        .catch(rejectProm);
     };
 
     this.queue = [...this.queue, funcToRun];
