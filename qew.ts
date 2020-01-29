@@ -42,7 +42,7 @@ export class Qew {
    * Push another async function onto the queue
    * @param asyncFunc the async function to push onto this queue
    */
-  public push<T>(asyncFunc: AsyncFunc<T>) {
+  public push = <T>(asyncFunc: AsyncFunc<T>) => {
     const [prom, resolveProm, rejectProm] = makeTriggerablePromise<T>();
 
     const funcToRun = () => {
@@ -61,23 +61,20 @@ export class Qew {
         .catch(rejectProm);
     };
 
-    this.queue = [...this.queue, funcToRun];
+    this.queue.push(funcToRun);
 
     this.tryMove();
 
     return prom;
-  }
+  };
 
   /**
    * @deprecated this is now only an alias for `Qew#push`
    */
   public pushProm = this.push;
 
-  private tryMove() {
-    if (this.executing >= this.maxConcurrent) {
-      // do nothing
-      return;
-    } else {
+  private tryMove = () => {
+    if (this.executing < this.maxConcurrent) {
       const first = this.queue.shift();
 
       if (first) {
@@ -85,7 +82,7 @@ export class Qew {
         first();
       }
     }
-  }
+  };
 }
 
 export default Qew;
