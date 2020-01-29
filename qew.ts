@@ -1,4 +1,5 @@
 type AsyncFunc<T> = () => Promise<T>;
+type DelayOrDelayer = number | (() => number);
 
 function makeTriggerablePromise<T>(): [
   Promise<T>,
@@ -25,7 +26,17 @@ export class Qew {
    * @param delay how many ms to wait between when one function has resolved and
    * the next one is run
    */
-  constructor(private maxConcurrent = 1, private delay = 0) {}
+  constructor(
+    private maxConcurrent = 1,
+    private delay: number | (() => number) = 0
+  ) {
+    if (maxConcurrent < 1) {
+      throw new Error("maxConcurrent has to be 1 or higher");
+    }
+    if (typeof delay === "number" && delay < 0) {
+      throw new Error("delay should be a positive number");
+    }
+  }
 
   /**
    * Push another async function onto the queue
@@ -40,9 +51,12 @@ export class Qew {
           resolveProm(result);
           this.executing = this.executing - 1;
 
+          const delay =
+            typeof this.delay === "function" ? this.delay() : this.delay;
+
           setTimeout(() => {
             this.tryMove();
-          }, this.delay);
+          }, delay);
         })
         .catch(rejectProm);
     };
