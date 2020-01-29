@@ -1,6 +1,6 @@
 {
   "name": "qew",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "description": "Queue asynchronous functions",
   "source": "qew.ts",
   "main": "dist/qew.js",

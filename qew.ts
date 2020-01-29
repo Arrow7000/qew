@@ -1,4 +1,4 @@
-type PromFunc<T> = () => Promise<T>;
+type AsyncFunc<T> = () => Promise<T>;
 
 function makeTriggerablePromise<T>(): [Promise<T>, (inp: T) => void] {
   let triggerResolveWith!: (inp: T) => void;
@@ -13,13 +13,23 @@ export class Qew {
   private queue: (() => void)[] = [];
   private executing = 0;
 
+  /**
+   *
+   * @param maxConcurrent how many functions can be run simultaneously
+   * @param delay how many ms to wait between when one function has resolved and
+   * the next one is run
+   */
   constructor(private maxConcurrent = 1, private delay = 0) {}
 
-  public push<T>(promFunc: PromFunc<T>) {
+  /**
+   * Push another async function onto the queue
+   * @param asyncFunc the async function to push onto this queue
+   */
+  public push<T>(asyncFunc: AsyncFunc<T>) {
     const [prom, resolveProm] = makeTriggerablePromise<T>();
 
     const funcToRun = () => {
-      promFunc().then(result => {
+      asyncFunc().then(result => {
         resolveProm(result);
         this.executing = this.executing - 1;
 
@@ -35,6 +45,11 @@ export class Qew {
 
     return prom;
   }
+
+  /**
+   * @deprecated this is now only an alias for `Qew#push`
+   */
+  public pushProm = this.push;
 
   private tryMove() {
     if (this.executing >= this.maxConcurrent) {
