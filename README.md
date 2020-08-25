@@ -4,7 +4,7 @@ A tiny library for queuing and throttling asynchronous functions.
 
 Perfect for managing resource-intensive processes and controlling access to rate-limited APIs.
 
-This project has 0 (zero) dependencies 👌.
+This project has 0 (zero) runtime dependencies 👌.
 
 ![NPM stats](https://nodei.co/npm/qew.png?downloads=true&downloadRank=true&stars=true)
 
@@ -81,7 +81,7 @@ prom
 // `push`'s result can also be `await`ed in an async function like any promise
 const doStuff = async () => {
     const result = await qew.push(asyncFunc);
-    // do stuff with `result`
+    // do something  with `result`
 }
 
 ```
@@ -112,7 +112,7 @@ function callback(err, result) {
 ```typescript
 constructor Qew(maxConcurrent: number = 1, delay: number | (() => number) = 0): Qew;
 
-Qew.push(func: () => Promise<T>, cb: (err: Error, result?: T) => void): this;
+Qew.push(asyncFunc: () => Promise<T>): Promise<T>;
 ```
 
 ## Contributing

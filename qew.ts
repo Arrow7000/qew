@@ -1,6 +1,3 @@
-type AsyncFunc<T> = () => Promise<T>;
-type DelayOrDelayer = number | (() => number);
-
 function makeTriggerablePromise<T>(): [
   Promise<T>,
   (inp: T) => void,
@@ -47,7 +44,7 @@ export class Qew {
    * whenever `asyncFunc` has been run and resolved. Or the Promise will reject
    * if `asyncFunc`'s Promise rejects
    */
-  public push<T>(asyncFunc: AsyncFunc<T>) {
+  public push<T>(asyncFunc: () => Promise<T>) {
     const [prom, resolveProm, rejectProm] = makeTriggerablePromise<T>();
 
     const funcToRun = () => {

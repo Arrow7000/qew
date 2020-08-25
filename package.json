@@ -1,6 +1,6 @@
 {
   "name": "qew",
-  "version": "0.11.0",
+  "version": "0.11.1",
   "description": "Queue asynchronous functions",
   "source": "qew.ts",
   "main": "dist/qew.js",
@@ -10,21 +10,23 @@
   "scripts": {
     "start": "microbundle watch",
     "build": "microbundle",
-    "test": "jest",
     "watch": "tsc -w",
     "prepublish": "npm run build"
   },
   "keywords": [
     "queue",
-    "async"
+    "async",
+    "throttle",
+    "promise"
   ],
-  "author": "",
+  "author": {
+    "name": "Aron Adler",
+    "email": "aron@adler.dev",
+    "url": "https://adler.dev/"
+  },
   "license": "MIT",
-  "repository": "Arrow7000/qew",
+  "repository": "github:Arrow7000/qew",
   "devDependencies": {
-    "@types/jest": "^25.1.0",
-    "jest": "^25.1.0",
-    "microbundle": "^0.11.0",
-    "ts-jest": "^25.0.0"
+    "microbundle": "^0.11.0"
   }
 }
