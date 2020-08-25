@@ -34,29 +34,32 @@ export class Qew {
       throw new Error("maxConcurrent has to be 1 or higher");
     }
     if (typeof delay === "number" && delay < 0) {
-      throw new Error("delay should be a positive number");
+      throw new Error(
+        "`delay` parameter should be either a non-negative number or a function that returns one"
+      );
     }
   }
 
   /**
    * Push another async function onto the queue
    * @param asyncFunc the async function to push onto this queue
+   * @returns a Promise that resolves with `asyncFunc`'s resolved value –
+   * whenever `asyncFunc` has been run and resolved. Or the Promise will reject
+   * if `asyncFunc`'s Promise rejects
    */
-  public push = <T>(asyncFunc: AsyncFunc<T>) => {
+  public push<T>(asyncFunc: AsyncFunc<T>) {
     const [prom, resolveProm, rejectProm] = makeTriggerablePromise<T>();
 
     const funcToRun = () => {
       asyncFunc()
-        .then(result => {
+        .then((result) => {
           resolveProm(result);
           this.executing = this.executing - 1;
 
           const delay =
             typeof this.delay === "function" ? this.delay() : this.delay;
 
-          setTimeout(() => {
-            this.tryMove();
-          }, delay);
+          setTimeout(this.tryMove, delay);
         })
         .catch(rejectProm);
     };
@@ -66,14 +69,14 @@ export class Qew {
     this.tryMove();
 
     return prom;
-  };
+  }
 
   /**
    * @deprecated this is now only an alias for `Qew#push`
    */
   public pushProm = this.push;
 
-  private tryMove = () => {
+  private tryMove() {
     if (this.executing < this.maxConcurrent) {
       const first = this.queue.shift();
 
@@ -82,7 +85,7 @@ export class Qew {
         first();
       }
     }
-  };
+  }
 }
 
 export default Qew;
