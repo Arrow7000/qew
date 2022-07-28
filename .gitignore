@@ -1,3 +1,5 @@
 node_modules
 .rts2_cache_*
 dist
+.yarn
+.pnp.*
