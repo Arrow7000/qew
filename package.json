@@ -1,6 +1,6 @@
 {
   "name": "qew",
-  "version": "0.11.1",
+  "version": "0.11.2",
   "description": "Queue asynchronous functions",
   "source": "qew.ts",
   "main": "dist/qew.js",
@@ -11,7 +11,7 @@
     "start": "microbundle watch",
     "build": "microbundle",
     "watch": "tsc -w",
-    "prepublish": "npm run build",
+    "prepublish": "yarn build",
     "test": "jest"
   },
   "keywords": [
